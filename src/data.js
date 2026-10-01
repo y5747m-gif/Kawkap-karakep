@@ -32,8 +32,21 @@ export const starterTraders=[
 ];
 
 export const starterSaleRequests=[
-  {id:'S-2048',title:'خردة نحاس أحمر نظيف',category:'المعادن',quantity:'25 كجم',location:'مدينة نصر، القاهرة',status:'assigned',traderId:'tr-1',createdAt:'اليوم، ٠٩:٢٠',image:products[0].img},
-  {id:'S-2047',title:'كرتون مضغوط وجاف',category:'الكرتون والورق',quantity:'80 كجم',location:'المعادي، القاهرة',status:'assigned',traderId:'tr-2',createdAt:'أمس، ٠٤:١٠',image:products[1].img},
-  {id:'S-2046',title:'غسالة أوتوماتيك قديمة',category:'الأجهزة الكهربائية',quantity:'قطعة واحدة',location:'الهرم، الجيزة',status:'review',traderId:null,createdAt:'أمس، ٠١:٤٠',image:products[2].img},
-  {id:'S-2045',title:'قطع كمبيوتر متنوعة',category:'الإلكترونيات',quantity:'مجموعة',location:'الدقي، الجيزة',status:'review',traderId:null,createdAt:'الأحد، ١١:٣٠',image:products[3].img}
+  {id:'S-2048',title:'خردة نحاس أحمر نظيف',category:'المعادن',quantity:'25 كجم',location:'مدينة نصر، القاهرة',status:'assigned',traderId:'tr-1',createdAt:'اليوم، ٠٩:٢٠',image:products[0].img,phone:'01012345678',address:'شارع الطيران، بجوار الحديقة الدولية، مدينة نصر',pickupTime:'من ١٠ ص إلى ٥ م'},
+  {id:'S-2047',title:'كرتون مضغوط وجاف',category:'الكرتون والورق',quantity:'80 كجم',location:'المعادي، القاهرة',status:'assigned',traderId:'tr-2',createdAt:'أمس، ٠٤:١٠',image:products[1].img,phone:'01123456789',address:'شارع ٩، المعادي الجديدة',pickupTime:'بعد ٤ م'},
+  {id:'S-2046',title:'غسالة أوتوماتيك قديمة',category:'الأجهزة الكهربائية',quantity:'قطعة واحدة',location:'الهرم، الجيزة',status:'review',traderId:null,createdAt:'أمس، ٠١:٤٠',image:products[2].img,phone:'01234567890',address:'شارع الهرم، محطة الطالبية',pickupTime:'يوم الجمعة'},
+  {id:'S-2045',title:'قطع كمبيوتر متنوعة',category:'الإلكترونيات',quantity:'مجموعة',location:'الدقي، الجيزة',status:'review',traderId:null,createdAt:'الأحد، ١١:٣٠',image:products[3].img,phone:'01512345678',address:'شارع محيي الدين أبو العز، الدقي',pickupTime:'من ١٢ ظ إلى ٧ م'}
+];
+
+/* عروض شراء يضعها التاجر للطلبات المُسندة إليه فقط. */
+export const starterPriceOffers=[
+  {id:'offer-1',requestId:'S-2048',traderId:'tr-1',amount:82,unit:'كجم',note:'السعر بعد المعاينة المبدئية، والاستلام من الموقع.',updatedAt:'اليوم، ١٠:٣٥'}
+];
+
+/* قائمة أسعار المتجر المصغّر للتاجر؛ يستطيع تعديل عناصره من بوابته فقط. */
+export const starterTraderPrices=[
+  {id:'price-1',traderId:'tr-1',name:'خردة نحاس أحمر',category:'المعادن',amount:85,unit:'كجم'},
+  {id:'price-2',traderId:'tr-1',name:'خردة ألومنيوم',category:'المعادن',amount:48,unit:'كجم'},
+  {id:'price-3',traderId:'tr-2',name:'كرتون جاف ومضغوط',category:'الكرتون والورق',amount:12,unit:'كجم'},
+  {id:'price-4',traderId:'tr-3',name:'لوحات إلكترونية مستعملة',category:'الإلكترونيات',amount:110,unit:'كجم'}
 ];

@@ -38,6 +38,9 @@ create table public.sale_requests (
   quantity numeric not null check(quantity > 0),
   unit text not null,
   location_text text not null,
+  pickup_address text not null,
+  contact_phone text not null,
+  preferred_contact_time text,
   image_url text,
   status public.sale_request_status not null default 'review',
   assigned_trader_id uuid references public.trader_profiles(id),
@@ -58,6 +61,50 @@ create table public.request_images (
   sale_request_id uuid not null references public.sale_requests(id) on delete cascade,
   url text not null,
   sort_order int not null default 0
+);
+
+-- سعر الشراء الذي يضعه التاجر للطلب المُسند إليه. لا يمكن لتاجر آخر قراءته أو تعديله.
+create table public.price_offers (
+  id uuid primary key default uuid_generate_v4(),
+  sale_request_id uuid not null references public.sale_requests(id) on delete cascade,
+  trader_id uuid not null references public.trader_profiles(id) on delete cascade,
+  amount numeric(12,2) not null check(amount >= 0),
+  unit text not null,
+  note text check(char_length(note) <= 1000),
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now(),
+  unique(sale_request_id, trader_id)
+);
+
+-- قائمة الأسعار الإرشادية في متجر التاجر المصغّر.
+create table public.trader_price_list (
+  id uuid primary key default uuid_generate_v4(),
+  trader_id uuid not null references public.trader_profiles(id) on delete cascade,
+  item_name text not null,
+  category text not null,
+  amount numeric(12,2) not null check(amount >= 0),
+  unit text not null,
+  active boolean not null default true,
+  updated_at timestamptz not null default now()
+);
+
+-- إشعارات موجهة، مع تفضيل إشعارات الجهاز لكل مستخدم.
+create table public.notifications (
+  id uuid primary key default uuid_generate_v4(),
+  recipient_id uuid not null references public.profiles(id) on delete cascade,
+  type text not null,
+  title text not null,
+  body text not null,
+  data jsonb not null default '{}'::jsonb,
+  read_at timestamptz,
+  created_at timestamptz not null default now()
+);
+create index notifications_recipient_idx on public.notifications(recipient_id, created_at desc);
+create table public.notification_preferences (
+  user_id uuid primary key references public.profiles(id) on delete cascade,
+  push_enabled boolean not null default false,
+  browser_subscription jsonb,
+  updated_at timestamptz not null default now()
 );
 
 -- لا يُنشأ الحوار إلا في سياق طلب أُسند فعلًا لتاجر.
@@ -117,6 +164,10 @@ alter table public.profiles enable row level security;
 alter table public.trader_profiles enable row level security;
 alter table public.sale_requests enable row level security;
 alter table public.request_images enable row level security;
+alter table public.price_offers enable row level security;
+alter table public.trader_price_list enable row level security;
+alter table public.notifications enable row level security;
+alter table public.notification_preferences enable row level security;
 alter table public.conversations enable row level security;
 alter table public.messages enable row level security;
 alter table public.trader_reviews enable row level security;
@@ -142,6 +193,29 @@ create policy "admin assigns requests" on public.sale_requests for update using(
 create policy "request participants read images" on public.request_images for select using(exists(select 1 from public.sale_requests r where r.id = sale_request_id and (r.client_id = auth.uid() or r.assigned_trader_id = auth.uid() or public.is_admin())));
 create policy "client uploads own request images" on public.request_images for insert with check(exists(select 1 from public.sale_requests r where r.id = sale_request_id and r.client_id = auth.uid()));
 
+-- يضيف التاجر عرضه فقط حين يكون هو التاجر المسند لهذا الطلب؛ العميل والمالك يقرآنه.
+create policy "participants read price offers" on public.price_offers for select using(
+  trader_id = auth.uid()
+  or exists(select 1 from public.sale_requests r where r.id = sale_request_id and (r.client_id = auth.uid() or public.is_admin()))
+);
+create policy "assigned trader creates price offer" on public.price_offers for insert with check(
+  trader_id = auth.uid() and exists(select 1 from public.sale_requests r where r.id = sale_request_id and r.assigned_trader_id = auth.uid() and r.status in ('assigned','contacted'))
+);
+create policy "assigned trader updates own price offer" on public.price_offers for update using(trader_id = auth.uid()) with check(trader_id = auth.uid());
+create policy "admin reads price offers" on public.price_offers for select using(public.is_admin());
+
+-- المتجر المصغّر: الأسعار المعتمدة عامة للعرض، لكن التعديل لصاحب المتجر وحده.
+create policy "public reads active trader prices" on public.trader_price_list for select using(active or trader_id = auth.uid() or public.is_admin());
+create policy "trader creates own list price" on public.trader_price_list for insert with check(trader_id = auth.uid());
+create policy "trader updates own list price" on public.trader_price_list for update using(trader_id = auth.uid()) with check(trader_id = auth.uid());
+create policy "trader deletes own list price" on public.trader_price_list for delete using(trader_id = auth.uid());
+
+-- لا يقرأ الإشعارات أو تفضيلات الجهاز إلا صاحبها؛ يرسلها الخادم/Edge Function للأطراف المعنية.
+create policy "user reads own notifications" on public.notifications for select using(recipient_id = auth.uid());
+create policy "user updates own notifications" on public.notifications for update using(recipient_id = auth.uid()) with check(recipient_id = auth.uid());
+create policy "user reads own notification preferences" on public.notification_preferences for select using(user_id = auth.uid());
+create policy "user writes own notification preferences" on public.notification_preferences for all using(user_id = auth.uid()) with check(user_id = auth.uid());
+
 create policy "participants read conversations" on public.conversations for select using(auth.uid() in(client_id,trader_id) or public.is_admin());
 create policy "participants read messages" on public.messages for select using(exists(select 1 from public.conversations c where c.id = conversation_id and (auth.uid() in(c.client_id,c.trader_id) or public.is_admin())));
 create policy "participants send messages" on public.messages for insert with check(sender_id = auth.uid() and exists(select 1 from public.conversations c where c.id = conversation_id and auth.uid() in(c.client_id,c.trader_id)));
@@ -149,5 +223,6 @@ create policy "participants send messages" on public.messages for insert with ch
 create policy "public reads trader reviews" on public.trader_reviews for select using(true);
 create policy "client reviews completed assigned request" on public.trader_reviews for insert with check(reviewer_id = auth.uid() and exists(select 1 from public.sale_requests r where r.id = sale_request_id and r.client_id = auth.uid() and r.assigned_trader_id = trader_id and r.status = 'completed'));
 
--- نفّذ عبر Edge Function / service role: اعتماد التاجر، إسناد الطلب، إنشاء المحادثة وتحديث متوسط التقييم.
--- لا تمنح role=admin أو صلاحية الإسناد مباشرة من واجهة المتصفح.
+-- نفّذ عبر Edge Function / service role: اعتماد التاجر، إسناد الطلب، إنشاء المحادثة،
+-- إنشاء إشعار للمالك/العميل/التاجر، وحفظ Web Push subscription وتحديث متوسط التقييم.
+-- لا تمنح role=admin أو صلاحية الإسناد أو إرسال الإشعار مباشرة من واجهة المتصفح.
