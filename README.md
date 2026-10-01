@@ -26,7 +26,7 @@ npm run dev
 الواجهة جاهزة لطبقة مزود. استخدم OpenStreetMap عبر Leaflet أو ضع Mapbox public token في `VITE_MAPBOX_TOKEN`. يجب حفظ الإحداثيات الفعلية فقط بعد موافقة المستخدم؛ بيانات العرض الحالية ليست مواقع إنتاج.
 
 ## النشر على Vercel
-اربط المستودع، اختر Vite، Build Command: `npm run build`، Output: `dist`، ثم أضف متغيرات البيئة. أضف rewrite من `/(.*)` إلى `/index.html` لتوجيه SPA، وسجّل نطاق الإنتاج في Supabase Auth.
+اربط المستودع، اختر Vite، Build Command: `npm run build`، Output: `dist`، ثم أضف متغيرات البيئة. يحتوي `vercel.json` على rewrite من `/(.*)` إلى `/index.html` لتعمل روابط SPA المباشرة وإعادة تحميل الصفحات دون خطأ 404. سجّل نطاق الإنتاج في Supabase Auth.
 
 ## الأمان والإنتاج
 RLS مفعّل كبداية. أضف Edge Functions للـ rate limiting، فحص الملفات server-side، صلاحيات admin claims، والتحقق بـ Zod قبل الإطلاق. الدفع الإلكتروني غير مفعل؛ الواجهة تعرض الدفع عند الاستلام فقط. الصور التجريبية من Unsplash وتُستبدل بملفات Storage في الإنتاج.
