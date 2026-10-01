@@ -99,3 +99,24 @@ header{position:sticky;top:0;z-index:50;background:color-mix(in srgb,var(--bg) 8
   .ownerRequestDetails .ownerDescription{grid-column:auto}
 }
 .dark .ownerGuide{background:linear-gradient(110deg,#12362b,#153342);border-color:#2b5a4d}
+
+/* ===== تحسين الهوية وسهولة الأزرار ===== */
+:root{--bg:#f7fbf9;--card:#fff;--text:#153c32;--muted:#60766e;--green:#087f5b;--green-deep:#056347;--mint:#e2f8ef;--line:#dceae5;--orange:#f5b942;--shadow:0 14px 38px rgba(8,90,65,.10)}
+button,a,input,select,textarea{transition:border-color .18s ease,background-color .18s ease,color .18s ease,box-shadow .18s ease,transform .18s ease}
+button:active,.primary:active,.secondary:active{transform:translateY(1px)}
+.primary,.secondary{min-height:48px;border-radius:15px;padding:12px 21px;font-weight:800;line-height:1.25}
+.primary{background:linear-gradient(135deg,var(--green),#0b956d);box-shadow:0 8px 20px rgba(8,127,91,.22)}
+.primary:hover{background:linear-gradient(135deg,var(--green-deep),var(--green));box-shadow:0 10px 24px rgba(8,127,91,.28);transform:translateY(-1px)}
+.secondary:hover{border-color:#86bbaa;background:var(--mint);color:var(--green)}
+.icon:hover{border-color:#9bc6b8;background:var(--mint);color:var(--green)}
+.formCard{box-shadow:0 12px 34px rgba(15,83,64,.06)}
+select:focus,input:focus,textarea:focus{border-color:#48a98b;box-shadow:0 0 0 4px rgba(53,211,154,.13)}
+.whatsappSubmit{background:linear-gradient(135deg,#18a968,#087f5b);font-size:18px;min-height:56px}
+.whatsappSubmit svg{width:23px;height:23px}
+.ownerControlHub{display:grid;grid-template-columns:repeat(5,1fr);gap:9px;margin:15px 0}
+.ownerControlHub button{min-height:70px;border:1px solid var(--line);background:var(--card);color:var(--text);border-radius:16px;padding:11px;display:flex;align-items:center;justify-content:center;gap:8px;font-weight:800;box-shadow:0 7px 20px rgba(15,83,64,.05)}
+.ownerControlHub button svg{color:var(--green)}
+.ownerControlHub button:hover{border-color:#72b9a3;background:var(--mint);color:var(--green);transform:translateY(-2px)}
+.dark{--bg:#071b16;--card:#102a23;--text:#effff9;--muted:#a5bdb5;--line:#294b40;--mint:#163d31;--green:#35d39a;--green-deep:#20b882;--shadow:0 14px 40px rgba(0,0,0,.34)}
+@media(max-width:900px){.ownerControlHub{grid-template-columns:repeat(3,1fr)}}
+@media(max-width:600px){.ownerControlHub{grid-template-columns:repeat(2,1fr)}.ownerControlHub button{min-height:62px;font-size:13px}.primary,.secondary{min-height:50px}.whatsappSubmit{min-height:58px}.actions{display:grid;grid-template-columns:1fr}.actions>*{width:100%}}

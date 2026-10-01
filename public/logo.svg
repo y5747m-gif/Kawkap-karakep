@@ -1,12 +1,36 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 96 96" role="img" aria-label="كوكب كراكيب">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-labelledby="title desc">
+  <title id="title">شعار كوكب كراكيب</title>
+  <desc id="desc">صندوق يدور حوله مسار ذهبي وأسهم إعادة استخدام خضراء على هيئة كوكب</desc>
   <defs>
-    <linearGradient id="planet" x1="18" y1="14" x2="77" y2="82" gradientUnits="userSpaceOnUse"><stop stop-color="#35d39a"/><stop offset="1" stop-color="#087f5b"/></linearGradient>
-    <linearGradient id="ring" x1="7" y1="63" x2="89" y2="30" gradientUnits="userSpaceOnUse"><stop stop-color="#f5b942"/><stop offset="1" stop-color="#ffcf67"/></linearGradient>
+    <linearGradient id="green" x1="94" y1="82" x2="402" y2="424" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#35d39a"/><stop offset="1" stop-color="#087f5b"/>
+    </linearGradient>
+    <linearGradient id="deep" x1="139" y1="109" x2="374" y2="418" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#15936b"/><stop offset="1" stop-color="#075942"/>
+    </linearGradient>
+    <linearGradient id="gold" x1="58" y1="338" x2="456" y2="188" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#ee9f22"/><stop offset=".5" stop-color="#ffc44d"/><stop offset="1" stop-color="#f5b942"/>
+    </linearGradient>
+    <linearGradient id="boxFront" x1="205" y1="217" x2="307" y2="340" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#d89542"/><stop offset="1" stop-color="#a95f23"/>
+    </linearGradient>
   </defs>
-  <circle cx="48" cy="47" r="29" fill="url(#planet)"/>
-  <path d="M27 40c8-12 27-16 40-3-3 6-7 11-14 15-12-2-20-5-26-12Z" fill="#eafff5" opacity=".96"/>
-  <path d="M29 42c6 2 13 6 19 12m-6-20c2 6 3 13 1 19m13-17c-2 6-2 12 0 18" fill="none" stroke="#087f5b" stroke-width="3" stroke-linecap="round" opacity=".8"/>
-  <path d="M10 60c13 11 48 17 75-3" fill="none" stroke="url(#ring)" stroke-width="8" stroke-linecap="round"/>
-  <path d="m66 19 4 7 8 1-6 6 2 8-8-4-7 4 1-8-6-6 8-1 4-7Z" fill="#fff5cc"/>
-  <circle cx="23" cy="23" r="3" fill="#f5b942"/>
+
+  <!-- Three circular arrows turn discarded objects into useful value. -->
+  <path d="M126 184c34-58 96-92 162-85 40 4 77 22 106 49l18-22c6-7 18-4 19 6l8 93c1 8-6 15-14 14l-91-14c-10-2-13-14-6-21l20-17c-22-18-49-29-78-31-42-3-81 17-104 52-7 11-21 15-32 8-12-6-15-21-8-32Z" fill="url(#green)"/>
+  <path d="M405 258c10-2 20 5 22 15 13 67-16 135-73 173-34 23-76 33-116 28l-1 29c0 10-12 15-20 9l-74-58c-7-5-7-15 0-20l75-56c8-6 20 0 19 10v27c28 5 57-1 81-17 35-23 54-64 48-106-2-16 8-31 24-34l15-3Z" fill="url(#deep)"/>
+  <path d="M180 438c-9 9-24 9-33 0-49-47-67-119-45-183 13-39 40-72 74-94l-17-23c-6-8 0-19 10-19l94 4c8 0 14 8 11 16l-31 88c-3 10-16 10-21 2l-13-24c-24 14-42 37-51 64-13 40-3 84 26 114 11 11 11 29 0 40l-4 5Z" fill="url(#green)"/>
+
+  <!-- The box represents household clutter offered through the marketplace. -->
+  <path d="m256 203 76 35-76 37-76-37 76-35Z" fill="#ffd889"/>
+  <path d="m180 238 76 37v82l-76-39v-80Z" fill="url(#boxFront)"/>
+  <path d="m332 238-76 37v82l76-39v-80Z" fill="#c77a2d"/>
+  <path d="m228 216 77 36-22 11-77-36 22-11Z" fill="#fff1bd" opacity=".92"/>
+  <path d="m283 263 22-11v31l-22 11v-31Z" fill="#e9a947"/>
+
+  <!-- A trusted route connects customers, the owner and merchants. -->
+  <path d="M67 315c31 27 102 44 186 42 98-2 181-30 203-66" fill="none" stroke="#fff9e8" stroke-width="31" stroke-linecap="round" opacity=".96"/>
+  <path d="M67 315c31 27 102 44 186 42 98-2 181-30 203-66" fill="none" stroke="url(#gold)" stroke-width="20" stroke-linecap="round"/>
+  <circle cx="67" cy="315" r="10" fill="#ee9f22"/>
+  <path d="m448 273 25 8-17 20" fill="none" stroke="#f5b942" stroke-width="15" stroke-linecap="round" stroke-linejoin="round"/>
 </svg>
