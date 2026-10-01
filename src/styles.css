@@ -71,3 +71,31 @@ header{position:sticky;top:0;z-index:50;background:color-mix(in srgb,var(--bg) 8
 .dark .adminWarning{background:#2b2113;border-color:#5c4a1e;color:#f5d994}
 .ratedDone{display:inline-flex;align-items:center;gap:6px;color:var(--green);background:var(--mint);border-radius:12px;padding:10px 14px;font-weight:700;font-size:13px}
 .ratedDone svg{width:16px;height:16px}
+
+/* تبسيط رحلة الطلب واتصال المالك */
+.ownerGate a{color:#fff;font-weight:800;text-decoration:underline;direction:ltr;display:inline-block;margin-inline:3px}
+.whatsappAction{margin:8px 0 14px;text-decoration:none}
+.ownerGuide{display:flex;align-items:center;gap:14px;background:linear-gradient(110deg,#e9faf2,#edf8ff);border:1px solid #c8e4d5;border-radius:18px;padding:15px 17px;margin:-8px 0 20px;color:var(--text)}
+.ownerGuide>span:first-child{width:42px;height:42px;min-width:42px;background:var(--mint);color:var(--green);border-radius:13px;display:grid;place-items:center}
+.ownerGuide>div{flex:1}
+.ownerGuide b{display:block;font-size:15px}
+.ownerGuide p{margin:3px 0 0;color:var(--muted);font-size:13px;line-height:1.7}
+.ownerPhonePill{display:flex;align-items:center;gap:6px;background:var(--green);color:#fff;border-radius:11px;padding:9px 11px;font-size:12px;text-decoration:none;white-space:nowrap}
+.ownerPhonePill svg{width:16px}
+.ownerPhonePill b{font-size:12px;display:inline}
+.ownerRequestDetails{display:grid;grid-template-columns:1fr 1fr;gap:7px 12px;background:var(--bg);border:1px solid var(--line);border-radius:13px;padding:11px;margin-top:12px;color:var(--muted);font-size:12px;line-height:1.55}
+.ownerRequestDetails>span{display:flex;align-items:flex-start;gap:5px;min-width:0}
+.ownerRequestDetails svg{width:15px;min-width:15px;color:var(--green);margin-top:2px}
+.ownerRequestDetails b{color:var(--text);margin-inline-start:2px;white-space:nowrap}
+.ownerRequestDetails a{color:var(--green);font-weight:800;text-decoration:underline}
+.ownerRequestDetails .ownerDescription{grid-column:1/-1}
+.assignControl label{display:grid;gap:7px;color:var(--muted);font-size:12px;font-weight:700}
+.assignControl label select{width:100%}
+@media(max-width:800px){
+  .ownerGuide{align-items:flex-start;flex-wrap:wrap}
+  .ownerGuide>div{min-width:calc(100% - 58px)}
+  .ownerPhonePill{margin-inline-start:58px}
+  .ownerRequestDetails{grid-template-columns:1fr}
+  .ownerRequestDetails .ownerDescription{grid-column:auto}
+}
+.dark .ownerGuide{background:linear-gradient(110deg,#12362b,#153342);border-color:#2b5a4d}

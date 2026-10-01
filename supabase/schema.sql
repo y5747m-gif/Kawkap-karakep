@@ -32,6 +32,7 @@ create table public.trader_profiles (
 create table public.sale_requests (
   id uuid primary key default uuid_generate_v4(),
   client_id uuid not null references public.profiles(id) on delete cascade,
+  customer_name text not null,
   title text not null,
   category text not null,
   description text,

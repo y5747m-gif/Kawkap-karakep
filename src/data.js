@@ -32,10 +32,10 @@ export const starterTraders=[
 ];
 
 export const starterSaleRequests=[
-  {id:'S-2048',title:'خردة نحاس أحمر نظيف',category:'المعادن',quantity:'25 كجم',location:'مدينة نصر، القاهرة',status:'assigned',traderId:'tr-1',createdAt:'اليوم، ٠٩:٢٠',image:products[0].img,phone:'01012345678',address:'شارع الطيران، بجوار الحديقة الدولية، مدينة نصر',pickupTime:'من ١٠ ص إلى ٥ م'},
-  {id:'S-2047',title:'كرتون مضغوط وجاف',category:'الكرتون والورق',quantity:'80 كجم',location:'المعادي، القاهرة',status:'assigned',traderId:'tr-2',createdAt:'أمس، ٠٤:١٠',image:products[1].img,phone:'01123456789',address:'شارع ٩، المعادي الجديدة',pickupTime:'بعد ٤ م'},
-  {id:'S-2046',title:'غسالة أوتوماتيك قديمة',category:'الأجهزة الكهربائية',quantity:'قطعة واحدة',location:'الهرم، الجيزة',status:'review',traderId:null,createdAt:'أمس، ٠١:٤٠',image:products[2].img,phone:'01234567890',address:'شارع الهرم، محطة الطالبية',pickupTime:'يوم الجمعة'},
-  {id:'S-2045',title:'قطع كمبيوتر متنوعة',category:'الإلكترونيات',quantity:'مجموعة',location:'الدقي، الجيزة',status:'review',traderId:null,createdAt:'الأحد، ١١:٣٠',image:products[3].img,phone:'01512345678',address:'شارع محيي الدين أبو العز، الدقي',pickupTime:'من ١٢ ظ إلى ٧ م'}
+  {id:'S-2048',customerName:'محمود أحمد',title:'خردة نحاس أحمر نظيف',category:'المعادن',quantity:'25 كجم',location:'مدينة نصر، القاهرة',status:'assigned',traderId:'tr-1',createdAt:'اليوم، ٠٩:٢٠',image:products[0].img,phone:'01012345678',address:'شارع الطيران، بجوار الحديقة الدولية، مدينة نصر',pickupTime:'من ١٠ ص إلى ٥ م'},
+  {id:'S-2047',customerName:'سارة محمد',title:'كرتون مضغوط وجاف',category:'الكرتون والورق',quantity:'80 كجم',location:'المعادي، القاهرة',status:'assigned',traderId:'tr-2',createdAt:'أمس، ٠٤:١٠',image:products[1].img,phone:'01123456789',address:'شارع ٩، المعادي الجديدة',pickupTime:'بعد ٤ م'},
+  {id:'S-2046',customerName:'أحمد علي',title:'غسالة أوتوماتيك قديمة',category:'الأجهزة الكهربائية',quantity:'قطعة واحدة',location:'الهرم، الجيزة',status:'review',traderId:null,createdAt:'أمس، ٠١:٤٠',image:products[2].img,phone:'01234567890',address:'شارع الهرم، محطة الطالبية',pickupTime:'يوم الجمعة'},
+  {id:'S-2045',customerName:'ندى حسن',title:'قطع كمبيوتر متنوعة',category:'الإلكترونيات',quantity:'مجموعة',location:'الدقي، الجيزة',status:'review',traderId:null,createdAt:'الأحد، ١١:٣٠',image:products[3].img,phone:'01512345678',address:'شارع محيي الدين أبو العز، الدقي',pickupTime:'من ١٢ ظ إلى ٧ م'}
 ];
 
 /* عروض شراء يضعها التاجر للطلبات المُسندة إليه فقط. */
