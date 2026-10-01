@@ -1,1 +1,42 @@
-{"name":"كوكب كراكيب — بيع بإشراف موثوق","short_name":"كوكب كراكيب","description":"منصة منظمة لبيع الكراكيب بإشراف المالك وتوجيهها لتجار موثوقين.","start_url":"/","scope":"/","display":"standalone","display_override":["window-controls-overlay","standalone"],"background_color":"#f5fbf8","theme_color":"#087f5b","lang":"ar","dir":"rtl","categories":["business","shopping","lifestyle"],"icons":[{"src":"/logo.svg","sizes":"any","type":"image/svg+xml","purpose":"any maskable"}]}
+{
+  "id": "/",
+  "name": "كوكب كراكيب — بيع بإشراف موثوق",
+  "short_name": "كوكب كراكيب",
+  "description": "منصة منظمة لبيع الكراكيب بإشراف المالك وتوجيهها لتجار موثوقين.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "display_override": ["standalone", "window-controls-overlay"],
+  "background_color": "#f5fbf8",
+  "theme_color": "#087f5b",
+  "lang": "ar",
+  "dir": "rtl",
+  "categories": ["business", "shopping", "lifestyle"],
+  "icons": [
+    { "src": "/logo.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" },
+    { "src": "/icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "/icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "/icons/icon-maskable-192.png", "sizes": "192x192", "type": "image/png", "purpose": "maskable" },
+    { "src": "/icons/icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ],
+  "shortcuts": [
+    {
+      "name": "أرسل طلب بيع",
+      "short_name": "بيع",
+      "url": "/sell",
+      "icons": [{ "src": "/icons/icon-192.png", "sizes": "192x192", "type": "image/png" }]
+    },
+    {
+      "name": "دليل التجار",
+      "short_name": "التجار",
+      "url": "/traders",
+      "icons": [{ "src": "/icons/icon-192.png", "sizes": "192x192", "type": "image/png" }]
+    },
+    {
+      "name": "طلباتي",
+      "short_name": "الطلبات",
+      "url": "/orders",
+      "icons": [{ "src": "/icons/icon-192.png", "sizes": "192x192", "type": "image/png" }]
+    }
+  ]
+}
