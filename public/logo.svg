@@ -1,1 +1,12 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><defs><linearGradient id="g" x2="1" y2="1"><stop stop-color="#34d399"/><stop offset="1" stop-color="#0d9488"/></linearGradient></defs><circle cx="32" cy="31" r="19" fill="url(#g)"/><path d="M20 27c7-9 17-9 25-2-2 10-9 18-20 17-6-4-8-9-5-15Z" fill="#ecfdf5" opacity=".9"/><path d="M6 39c8 7 38 8 52-6" fill="none" stroke="#f5b942" stroke-width="5" stroke-linecap="round"/><path d="m25 24 5-3 4 5m4 3 1 6-6 1m-4 2-6-2 1-6" fill="none" stroke="#087f5b" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 96 96" role="img" aria-label="كوكب كراكيب">
+  <defs>
+    <linearGradient id="planet" x1="18" y1="14" x2="77" y2="82" gradientUnits="userSpaceOnUse"><stop stop-color="#35d39a"/><stop offset="1" stop-color="#087f5b"/></linearGradient>
+    <linearGradient id="ring" x1="7" y1="63" x2="89" y2="30" gradientUnits="userSpaceOnUse"><stop stop-color="#f5b942"/><stop offset="1" stop-color="#ffcf67"/></linearGradient>
+  </defs>
+  <circle cx="48" cy="47" r="29" fill="url(#planet)"/>
+  <path d="M27 40c8-12 27-16 40-3-3 6-7 11-14 15-12-2-20-5-26-12Z" fill="#eafff5" opacity=".96"/>
+  <path d="M29 42c6 2 13 6 19 12m-6-20c2 6 3 13 1 19m13-17c-2 6-2 12 0 18" fill="none" stroke="#087f5b" stroke-width="3" stroke-linecap="round" opacity=".8"/>
+  <path d="M10 60c13 11 48 17 75-3" fill="none" stroke="url(#ring)" stroke-width="8" stroke-linecap="round"/>
+  <path d="m66 19 4 7 8 1-6 6 2 8-8-4-7 4 1-8-6-6 8-1 4-7Z" fill="#fff5cc"/>
+  <circle cx="23" cy="23" r="3" fill="#f5b942"/>
+</svg>
