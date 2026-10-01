@@ -36,3 +36,17 @@ header{position:sticky;top:0;z-index:50;background:color-mix(in srgb,var(--bg) 8
 @media(max-width:1050px){.mainNav{display:none}}
 @media(max-width:800px){.top{position:relative}.headsearch{top:72px}.quickStart{padding-top:12px}.quickGrid{grid-template-columns:1fr}.quickGrid>button{padding:14px}.hero .actions{display:grid}.hero .actions button{width:100%}.heroText{text-align:center}.heroText>p{margin-inline:auto}.hero .actions,.hero .trust{justify-content:center}.menuPanel{position:fixed;top:68px;left:14px;right:14px;width:auto}.menuButton{display:grid!important}}
 @media(prefers-reduced-motion:reduce){*,*:before,*:after{scroll-behavior:auto!important;animation-duration:.01ms!important;transition-duration:.01ms!important}}
+
+/* ===== الحسابات والدخول ===== */
+.authActions{display:flex;gap:10px;flex-wrap:wrap;justify-content:center;margin-top:18px}
+.authActions button{display:inline-flex;align-items:center;gap:7px}
+.loginNote{display:flex;align-items:center;gap:7px;justify-content:center;background:var(--mint);color:var(--green);border-radius:12px;padding:10px 14px;font-size:13px;font-weight:700;max-width:620px}
+.loginNote svg{width:17px;min-width:17px}
+.registrationCard .loginError,.traderLoginCard .loginError{margin-bottom:16px}
+.registrationCard .textLink{display:flex;margin:10px auto 0}
+.traderLoginCard .ownerHelp{margin-top:14px}
+.ownerHelp .textLink{padding:0;font-size:12px;text-decoration:underline}
+.traderContactPrivate{display:flex;gap:6px;align-items:flex-start;margin-top:10px;background:var(--mint);color:#27674f;border-radius:10px;padding:8px 10px;font-size:12px;line-height:1.6}
+.traderContactPrivate svg{width:14px;min-width:14px;margin-top:2px}
+.traderContactPrivate b{display:block;direction:ltr;text-align:right;letter-spacing:.5px}
+.traderContactPrivate em{display:block;font-style:normal;color:var(--muted);margin-top:2px}
