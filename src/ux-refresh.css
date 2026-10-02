@@ -1,0 +1,194 @@
+/*
+ * واجهة 2026 المبسطة
+ * هذا الملف يضبط الهوية الجديدة والتنقل والصفحة الرئيسية دون التأثير في تدفقات العمل.
+ */
+
+/* الهوية والشريط العلوي */
+.logo{gap:10px;text-align:right}
+.logoMark{width:48px;height:48px;display:grid;place-items:center;border-radius:16px;background:linear-gradient(145deg,#edfff8,#d7f8eb);box-shadow:inset 0 0 0 1px rgba(8,127,91,.08)}
+.logoMark img,.logo img{width:44px;height:44px}
+.logoCopy{display:grid;gap:1px;line-height:1.05}
+.logoName{font-size:20px;font-weight:800;letter-spacing:-.35px}
+.logoCopy small{font-size:10px;color:var(--muted);font-weight:700;letter-spacing:0}
+.dark .logoMark{background:#173d32;box-shadow:inset 0 0 0 1px #2b5b4e}
+header{background:color-mix(in srgb,var(--bg) 92%,transparent);box-shadow:0 1px 0 rgba(12,80,61,.03)}
+.top{height:82px;max-width:1280px;gap:18px}
+.logoButton{border-radius:16px}
+.mainNav{gap:4px}
+.mainNav button{min-height:42px;padding:10px 14px;color:var(--muted);position:relative}
+.mainNav button:hover,.mainNav button.active{background:var(--mint);color:var(--green)}
+.mainNav button.active:after{content:'';position:absolute;right:14px;left:14px;bottom:4px;height:2px;border-radius:2px;background:var(--green)}
+.headerActions{margin-inline-start:auto;display:flex;align-items:center;gap:8px}
+.headerSell,.headerAccount{height:44px;border-radius:13px;padding:0 14px;display:flex;align-items:center;justify-content:center;gap:7px;white-space:nowrap;font-weight:800}
+.headerSell{border:0;background:var(--green);color:#fff;box-shadow:0 7px 18px rgba(8,127,91,.2)}
+.headerSell:hover{background:var(--green-deep);transform:translateY(-1px)}
+.headerAccount{border:1px solid var(--line);background:var(--card);color:var(--text)}
+.headerAccount:hover{border-color:#8bbdac;background:var(--mint);color:var(--green)}
+.headerSell svg,.headerAccount svg{width:18px}
+.headerActions .icon{width:44px;height:44px;border-radius:13px}
+.menuPanel{top:54px;width:250px;padding:9px;border-radius:17px;box-shadow:0 22px 55px rgba(6,45,36,.2)}
+.menuPanel b{color:var(--green)}
+
+/* الصفحة الرئيسية: رسالة واحدة واضحة ومسار مرئي */
+.hero{min-height:620px;grid-template-columns:1.02fr .98fr;gap:58px;padding-top:58px;padding-bottom:48px}
+.hero h1{font-size:clamp(48px,5vw,66px);line-height:1.14;margin:19px 0 17px;letter-spacing:-2.4px}
+.hero mark:after{height:12px;bottom:2px;opacity:.58}
+.heroText>p{font-size:18px;max-width:620px;line-height:1.95}
+.heroPromises{display:flex;flex-wrap:wrap;gap:9px;margin-top:21px}
+.heroPromises span{display:flex;align-items:center;gap:6px;padding:8px 10px;border:1px solid var(--line);border-radius:11px;background:color-mix(in srgb,var(--card) 82%,transparent);color:var(--muted);font-size:12px;font-weight:700}
+.heroPromises svg{width:16px;color:var(--green)}
+.hero .actions{margin-top:23px}
+.heroCta{min-height:54px;padding-inline:24px;font-size:16px}
+.heroCta svg:first-child{width:21px}
+.hero .trust{gap:0;margin-top:30px;padding-top:20px;border-top:1px solid var(--line)}
+.hero .trust span{padding-inline:18px;border-inline-start:1px solid var(--line)}
+.hero .trust span:first-child{padding-inline-start:0;border-inline-start:0}
+.hero .trust b{font-size:17px;margin-bottom:3px}
+.heroVisual{height:486px;border-radius:38px;background:linear-gradient(145deg,#063f31 0%,#087f5b 54%,#13a57d 100%);display:block;overflow:hidden;isolation:isolate;box-shadow:0 28px 65px rgba(5,82,61,.2)}
+.heroVisual:before{content:'';position:absolute;width:390px;height:390px;right:-120px;top:-155px;border:1px solid rgba(255,255,255,.14);border-radius:50%;box-shadow:0 0 0 55px rgba(255,255,255,.035),0 0 0 110px rgba(255,255,255,.025);z-index:-1}
+.heroVisual:after{content:'';position:absolute;width:230px;height:230px;left:-105px;bottom:-100px;border-radius:50%;background:#f5b942;opacity:.16;filter:blur(1px);z-index:-1}
+.heroBrandMark{position:absolute;top:25px;right:28px;display:flex;align-items:center;gap:9px;color:#fff;font-size:12px;font-weight:800}
+.heroBrandMark img{width:68px;height:68px;filter:drop-shadow(0 10px 16px rgba(0,0,0,.18))}
+.heroBrandMark span{padding:7px 10px;border:1px solid rgba(255,255,255,.2);background:rgba(255,255,255,.1);border-radius:30px}
+.journeyCard{position:absolute;top:92px;right:30px;left:30px;padding:22px;background:rgba(255,255,255,.96);color:#153c32;border:1px solid rgba(255,255,255,.72);border-radius:24px;box-shadow:0 24px 45px rgba(3,49,37,.22);backdrop-filter:blur(12px)}
+.journeyHead{display:flex;align-items:center;gap:10px;padding-bottom:14px;border-bottom:1px solid #dfece7}
+.journeyHead>span{width:42px;height:42px;display:grid;place-items:center;border-radius:13px;background:#e2f8ef;color:#087f5b}
+.journeyHead>div{display:grid;flex:1}
+.journeyHead small{font-size:11px;color:#60766e}
+.journeyHead b{font-size:15px}
+.journeyHead em{font-style:normal;font-size:11px;font-weight:800;color:#087f5b;background:#e2f8ef;padding:6px 9px;border-radius:20px}
+.journeyCard ol{list-style:none;margin:15px 0 0;padding:0;display:grid;grid-template-columns:1fr 1fr;gap:9px}
+.journeyCard li{display:flex;align-items:center;gap:9px;min-height:66px;padding:10px;border:1px solid #e1ece8;border-radius:14px;background:#fff}
+.journeyCard li>span{width:31px;height:31px;min-width:31px;display:grid;place-items:center;border-radius:10px;background:#edf3f0;color:#688078;font-size:12px;font-weight:800}
+.journeyCard li>div{display:grid;gap:2px;min-width:0}
+.journeyCard li b{font-size:12px}
+.journeyCard li small{font-size:10px;color:#60766e;line-height:1.45}
+.journeyCard li.done{border-color:#c7eadc;background:#f7fffb}
+.journeyCard li.done>span{background:#087f5b;color:#fff}
+.journeyCard li.done svg{width:16px}
+.journeyCard li.current{border-color:#e7b84f;background:#fffaf0}
+.journeyCard li.current>span{background:#f5b942;color:#5a3b00}
+.heroSafe{position:absolute;bottom:23px;left:26px;display:flex;align-items:center;gap:9px;padding:10px 13px;border:1px solid rgba(255,255,255,.22);background:rgba(1,47,35,.48);color:#fff;border-radius:15px;backdrop-filter:blur(10px)}
+.heroSafe>svg{width:20px;color:#ffd879}
+.heroSafe>span{display:grid}
+.heroSafe b{font-size:12px}
+.heroSafe small{font-size:10px;color:#d4f7e9}
+
+/* نقاط الدخول السريعة */
+.quickStart{padding-top:30px;padding-bottom:66px}
+.quickStart .sectionTitle{align-items:center;margin-bottom:18px}
+.quickStart .sectionTitle>p{max-width:360px;margin:0;color:var(--muted);font-size:13px;line-height:1.7}
+.quickGrid{gap:14px}
+.quickGrid>button{min-height:96px;padding:18px;border-radius:20px;box-shadow:0 9px 27px rgba(14,82,63,.055)}
+.quickGrid>button:hover{box-shadow:0 14px 30px rgba(14,82,63,.1)}
+.quickGrid>button>span{width:51px;height:51px;border-radius:16px}
+.quickGrid>button>div{gap:5px}
+.quickGrid>button b{font-size:16px}
+.quickGrid>button.quickPrimary{background:linear-gradient(135deg,#087f5b,#0d9872);border-color:transparent;color:#fff;box-shadow:0 14px 30px rgba(8,127,91,.2)}
+.quickGrid>button.quickPrimary>span{background:rgba(255,255,255,.16);color:#fff}
+.quickGrid>button.quickPrimary small,.quickGrid>button.quickPrimary>svg{color:#dcfff2}
+.workflowSection{padding-top:26px}
+.workflow article{min-height:196px;padding:22px;box-shadow:0 8px 25px rgba(14,82,63,.04)}
+.workflow article>span{width:54px;height:54px;border-radius:17px}
+.workflow article>span svg{width:23px;height:23px}
+.workflow h3{font-size:18px}
+
+/* تذييل واضح بدل النهايات المفتوحة */
+.siteFooter{margin-top:90px;padding:54px 0 20px;background:#073d31;color:#fff;border-top:1px solid rgba(255,255,255,.08)}
+.footerGrid{display:grid;grid-template-columns:1.6fr .8fr .8fr;gap:70px}
+.siteFooter .logo{color:#fff}
+.siteFooter .logo b{color:#77e5ba}
+.siteFooter .logoMark{background:rgba(255,255,255,.95)}
+.siteFooter .logoCopy small{color:#a9d5c5}
+.footerBrand>p{max-width:450px;color:#b9ddcf;line-height:1.9;margin:17px 0}
+.footerBrand>a{display:inline-flex;align-items:center;gap:7px;color:#fff;text-decoration:none;font-weight:800;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.14);padding:10px 13px;border-radius:12px}
+.footerBrand>a:hover{background:rgba(255,255,255,.17)}
+.footerBrand>a svg{width:18px}
+.footerLinks{display:grid;align-content:start;gap:7px}
+.footerLinks>b{color:#8fe6c3;margin-bottom:8px}
+.footerLinks button{border:0;background:none;color:#d4eee4;padding:6px 0;text-align:right;width:max-content}
+.footerLinks button:hover{color:#fff;transform:translateX(-3px)}
+.footerBottom{display:flex;justify-content:space-between;align-items:center;border-top:1px solid rgba(255,255,255,.1);margin-top:42px;padding-top:18px;color:#9ac5b5;font-size:12px}
+.footerBottom span{display:flex;align-items:center;gap:6px}
+.footerBottom svg{width:16px}
+
+@media(max-width:1180px){
+  .top{gap:10px}
+  .logoCopy small{display:none}
+  .headerAccount span{display:none}
+  .headerAccount{width:44px;padding:0}
+  .hero{gap:34px}
+}
+@media(max-width:1050px){
+  .mainNav{display:none}
+  .headerAccount span{display:inline}
+  .headerAccount{width:auto;padding:0 14px}
+  .hero{grid-template-columns:1fr 1fr}
+  .footerGrid{gap:35px}
+}
+@media(max-width:900px){
+  .hero{grid-template-columns:1fr;gap:30px;padding-top:42px}
+  .heroText{text-align:center}
+  .heroText>p{margin-inline:auto}
+  .heroPromises,.hero .actions,.hero .trust{justify-content:center}
+  .hero .trust span:first-child{padding-inline-start:18px}
+  .heroVisual{width:min(620px,100%);margin-inline:auto}
+  .quickStart .sectionTitle>p{display:none}
+  .footerGrid{grid-template-columns:1.4fr 1fr 1fr}
+}
+@media(max-width:800px){
+  header{margin-bottom:0}
+  .top{height:68px;padding-inline:14px}
+  .logo{gap:7px}
+  .logoMark{width:40px;height:40px;border-radius:13px}
+  .logoMark img,.logo img{width:37px;height:37px}
+  .logoName{font-size:16px!important}
+  .logoCopy small{display:none}
+  .headerActions{gap:6px}
+  .headerSell,.headerAccount,.themeButton{display:none}
+  .headerActions .icon{width:41px;height:41px;border-radius:12px}
+  .menuPanel{top:64px}
+  .hero{padding-top:33px;padding-bottom:28px}
+  .hero h1{font-size:clamp(39px,10.5vw,51px);letter-spacing:-1.7px}
+  .heroText>p{font-size:16px}
+  .heroPromises{gap:6px}
+  .heroPromises span{font-size:11px;padding:7px 8px}
+  .hero .actions{display:grid;grid-template-columns:1fr 1fr;max-width:540px;margin-inline:auto;margin-top:20px}
+  .hero .actions button{width:100%;padding-inline:13px}
+  .hero .trust{display:grid;grid-template-columns:1fr 1fr;width:100%;gap:10px}
+  .hero .trust span{padding:8px;border:1px solid var(--line);border-radius:12px;background:var(--card)}
+  .hero .trust span:first-child{padding:8px}
+  .hero .trust span:last-child{display:none}
+  .heroVisual{height:520px;border-radius:28px;text-align:right}
+  .heroBrandMark{top:18px;right:20px}
+  .heroBrandMark img{width:58px;height:58px}
+  .journeyCard{top:79px;right:17px;left:17px;padding:16px;border-radius:20px}
+  .journeyCard ol{grid-template-columns:1fr}
+  .journeyCard li{min-height:53px;padding:8px}
+  .journeyCard li small{font-size:9.5px}
+  .heroSafe{bottom:15px;left:17px}
+  .quickStart{padding-top:21px;padding-bottom:51px}
+  .quickGrid{grid-template-columns:1fr}
+  .quickGrid>button{min-height:82px;padding:14px 15px}
+  .quickGrid>button>span{width:46px;height:46px}
+  .workflowSection{padding-top:14px}
+  .siteFooter{margin-top:62px;padding-top:38px;padding-bottom:108px}
+  .footerGrid{grid-template-columns:1fr 1fr;gap:32px 25px}
+  .footerBrand{grid-column:1/-1}
+  .footerBrand>p{max-width:560px}
+  .footerBottom{margin-top:30px}
+}
+@media(max-width:480px){
+  .logoName{font-size:15px!important}
+  .headerActions .notificationButton{display:grid!important}
+  .hero h1{font-size:38px}
+  .heroPromises span:last-child{display:none}
+  .hero .actions{grid-template-columns:1fr}
+  .heroVisual{height:520px}
+  .heroBrandMark span{display:none}
+  .journeyHead em{display:none}
+  .quickGrid>button b{font-size:15px}
+  .footerGrid{grid-template-columns:1fr}
+  .footerBrand{grid-column:auto}
+  .footerBottom{align-items:flex-start;gap:10px;flex-direction:column}
+}
