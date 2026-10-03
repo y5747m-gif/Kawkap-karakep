@@ -6,28 +6,81 @@ import{cats,products,starterPriceOffers,starterSaleRequests,starterTraderPrices,
 import{safeGet,safeSet,safeRemove,readJson,writeJson,normalizePhone,phoneError,passwordError,makeAccount,findAccountByPhone,verifyPassword,buildStarterAccounts,checkOwnerCredentials,OWNER_SESSION_KEY,OWNER_USERNAME,OWNER_USES_DEFAULTS,DEMO_TRADER_PASSWORD,DATA_VERSION,migrateKawkapStorage,throttleStatus,registerFailedAttempt,clearAttempts}from'./auth';
 import'./styles.css';
 import'./ux-refresh.css';
+import'./simple-ui.css';
 
 const number=n=>new Intl.NumberFormat('ar-EG').format(n);
 const clampText=(value,max)=>String(value??'').trim().slice(0,max);
 const UNITS=['كجم','قطعة','مجموعة','طن'];
 const OWNER_PHONE='01013178718';
 const OWNER_WHATSAPP_NUMBER='201013178718';
+const OWNER_GENERAL_WHATSAPP=`https://wa.me/${OWNER_WHATSAPP_NUMBER}?text=${encodeURIComponent('السلام عليكم، محتاج مساعدة في بيع الكراكيب على كوكب كراكيب.')}`;
+const CATEGORY_ICONS={
+  'الكرتون والورق':I.PackageOpen,
+  'المعادن':I.Hammer,
+  'البلاستيك':I.Recycle,
+  'العلب':I.Boxes,
+  'الإلكترونيات':I.Cpu,
+  'الأجهزة الكهربائية':I.WashingMachine,
+  'زيوت مستعملة':I.Droplets,
+  'أجهزة رياضية':I.Dumbbell,
+  'قطع غيار':I.Settings,
+  'أثاث ومعدات':I.Armchair,
+  'أخشاب':I.Trees,
+  'مواد قابلة لإعادة الاستخدام':I.RefreshCw,
+};
+function CategoryIcon({name}){const C=CATEGORY_ICONS[name]||I.Package;return <C/>}
 const ownerWhatsappUrl=request=>{
   const text=[
-    'طلب بيع جديد من كوكب كراكيب',
-    `رقم الطلب: ${request.id}`,
-    `اسم العميل: ${request.customerName}`,
-    `رقم العميل: ${request.phone}`,
-    `المطلوب: ${request.title}`,
-    `التصنيف: ${request.category}`,
-    `الكمية: ${request.quantity}`,
-    `المنطقة: ${request.location}`,
-    `العنوان التفصيلي: ${request.address}`,
-    `الوقت المناسب: ${request.pickupTime}`,
-    `الوصف: ${request.description}`,
+    '🟢 *طلب بيع جديد — كوكب كراكيب*',
+    '━━━━━━━━━━━━━━',
+    `🔖 رقم الطلب: ${request.id}`,
+    `👤 اسم العميل: ${request.customerName}`,
+    `📞 رقم العميل: ${request.phone}`,
+    `♻️ المطلوب: ${request.title}`,
+    `📦 التصنيف: ${request.category}`,
+    `⚖️ الكمية: ${request.quantity}`,
+    `📍 المنطقة: ${request.location}`,
+    `🏠 العنوان: ${request.address}`,
+    `🕐 الوقت المناسب: ${request.pickupTime}`,
+    `📝 الحالة: ${request.description}`,
+    request.photoCount?`📷 الصور: لدى العميل ${request.photoCount} صورة وسيُرفقها في المحادثة`:'📷 الصور: سيُرسلها العميل في المحادثة إن وجدت',
+    '━━━━━━━━━━━━━━',
+    '✅ برجاء مراجعة الطلب والتواصل مع العميل.',
   ].join('\n');
   return `https://wa.me/${OWNER_WHATSAPP_NUMBER}?text=${encodeURIComponent(text)}`;
 };
+function ReadButton({text,label='اسمع الشرح'}){
+  const[speaking,setSpeaking]=useState(false);
+  const supported=typeof window!=='undefined'&&'speechSynthesis'in window;
+  const read=()=>{
+    if(!supported)return;
+    window.speechSynthesis.cancel();
+    if(speaking){setSpeaking(false);return}
+    const speech=new SpeechSynthesisUtterance(text);
+    speech.lang='ar-EG';speech.rate=.84;speech.pitch=1;
+    const voices=window.speechSynthesis.getVoices();
+    const arabic=voices.find(v=>v.lang?.toLowerCase().startsWith('ar'));
+    if(arabic)speech.voice=arabic;
+    speech.onend=()=>setSpeaking(false);speech.onerror=()=>setSpeaking(false);
+    setSpeaking(true);window.speechSynthesis.speak(speech);
+  };
+  return <button type="button" className="readButton" onClick={read} disabled={!supported} title={supported?label:'القراءة الصوتية غير متاحة في هذا المتصفح'}>{speaking?<I.Square/>:<I.Volume2/>} {speaking?'إيقاف الصوت':label}</button>;
+}
+function VoiceButton({onResult,label='اتكلم بدل الكتابة'}){
+  const[state,setState]=useState('idle');
+  const start=()=>{
+    const Recognition=window.SpeechRecognition||window.webkitSpeechRecognition;
+    if(!Recognition){setState('unsupported');return}
+    const recognition=new Recognition();
+    recognition.lang='ar-EG';recognition.interimResults=false;recognition.maxAlternatives=1;
+    recognition.onstart=()=>setState('listening');
+    recognition.onresult=e=>{const value=e.results?.[0]?.[0]?.transcript||'';if(value)onResult(value);setState('idle')};
+    recognition.onerror=()=>setState('error');recognition.onend=()=>setState(current=>current==='listening'?'idle':current);
+    recognition.start();
+  };
+  return <><button type="button" className={'voiceButton '+(state==='listening'?'listening':'')} onClick={start}><I.Mic/> {state==='listening'?'اتكلم دلوقتي...':label}</button>{state==='unsupported'&&<small className="speechHint">الميزة دي مش متاحة في المتصفح ده</small>}{state==='error'&&<small className="speechHint">مسمعتش كويس، جرّب تاني</small>}</>;
+}
+function WhatsappFloat(){return <a className="whatsappFloat" href={OWNER_GENERAL_WHATSAPP} target="_blank" rel="noreferrer" aria-label={`مساعدة واتساب على ${OWNER_PHONE}`}><I.MessageCircle/><span>محتاج مساعدة؟<small dir="ltr">{OWNER_PHONE}</small></span></a>}
 const PAGE_TITLES={'/sell':'أرسل طلب بيع','/orders':'طلبات البيع','/cart':'طلبات البيع','/traders':'دليل التجار الموثوقين','/chat':'المحادثات','/market':'فرص بيع معتمدة','/register':'إنشاء حساب','/login':'تسجيل الدخول','/signin':'تسجيل الدخول','/trader-login':'بوابة التاجر','/trader':'بوابة التاجر','/notifications':'الإشعارات','/profile':'حسابي','/owner-login':'بوابة مالك الموقع','/admin':'بوابة مالك الموقع','/about':'عن المنصة'};
 function useStored(key,fallback){const[value,setValue]=useState(()=>readJson(key,fallback));useEffect(()=>{writeJson(key,value)},[key,value]);return[value,setValue]}
 function Logo(){return <div className="logo" aria-label="كوكب كراكيب"><span className="logoMark" aria-hidden="true"><img src="/logo.svg" alt="" width="48" height="48"/></span><span className="logoCopy"><span className="logoName">كوكب <b>كراكيب</b></span><small>بيع أسهل · قيمة أكبر</small></span></div>}
@@ -69,15 +122,16 @@ function App(){
   const installApp=async()=>{if(installPrompt){installPrompt.prompt();const result=await installPrompt.userChoice;if(result.outcome==='accepted')notify('يجري تثبيت التطبيق على جهازك');setInstallPrompt(null)}else notify('لتثبيت التطبيق: افتح قائمة المتصفح ثم اختر «تثبيت التطبيق» أو «إضافة إلى الشاشة الرئيسية».')};
   const createRequest=data=>{
     const clean={
-      customerName:clampText(data.customerName,80),
-      title:clampText(data.title,80),
+      customerName:clampText(data.customerName,80)||'عميل جديد',
+      title:clampText(data.title,80)||`${clampText(data.category,40)||'كراكيب'} للبيع`,
       category:clampText(data.category,40),
       quantity:clampText(data.quantity,30),
       location:clampText(data.location,80),
-      description:clampText(data.description,600),
+      description:clampText(data.description,600)||'يرجى تقييم الحالة من الصور أو عند التواصل',
       phone:normalizePhone(data.phone),
-      address:clampText(data.address,300),
-      pickupTime:clampText(data.pickupTime,100),
+      address:clampText(data.address,300)||clampText(data.location,80),
+      pickupTime:clampText(data.pickupTime,100)||'أي وقت مناسب',
+      photoCount:Math.min(8,Math.max(0,Number(data.photoCount)||0)),
     };
     if(clean.customerName.length<2)return{ok:false,error:'اكتب اسم العميل كاملًا (حرفان على الأقل).'};
     if(clean.title.length<3)return{ok:false,error:'اكتب عنوانًا واضحًا للطلب (٣ أحرف على الأقل).'};
@@ -242,45 +296,43 @@ function App(){
   else if(pathname==='/about')page=<About/>;
   else page=<NotFound go={nav}/>;
   const unread=visibleNotifications.filter(n=>!n.read).length;
-  return <ErrorBoundary resetKey={pathname} go={nav}><a className="skipLink" href="#main">تجاوز إلى المحتوى الرئيسي</a><Header go={nav} path={pathname} dark={dark} setDark={setDark} unread={unread} onInstall={installApp} currentUser={currentUser} isOwner={ownerSession} onLogout={logout} onOwnerLogout={ownerLogout}/><main id="main">{page}</main><Footer go={nav}/><Bottom go={nav} path={pathname}/>{toast&&<div className="toast" role="status" aria-live="polite"><I.CircleCheck/> {toast}</div>}</ErrorBoundary>;
+  return <ErrorBoundary resetKey={pathname} go={nav}><a className="skipLink" href="#main">تجاوز إلى المحتوى الرئيسي</a><Header go={nav} path={pathname} dark={dark} setDark={setDark} unread={unread} onInstall={installApp} currentUser={currentUser} isOwner={ownerSession} onLogout={logout} onOwnerLogout={ownerLogout}/><main id="main">{page}</main><Footer go={nav}/><WhatsappFloat/><Bottom go={nav} path={pathname}/>{toast&&<div className="toast" role="status" aria-live="polite"><I.CircleCheck/> {toast}</div>}</ErrorBoundary>;
 }
 function Header({go,path,dark,setDark,unread,onInstall,currentUser,isOwner,onLogout,onOwnerLogout}){
   const[open,setOpen]=useState(false);
   const visit=to=>{setOpen(false);go(to)};
   const act=fn=>{setOpen(false);fn()};
   const active=to=>to==='/'?path==='/':path===to||to==='/orders'&&path==='/cart';
-  const accountPath=isOwner?'/owner-login':currentUser?.role==='trader'?'/trader':'/profile';
-  const accountLabel=isOwner?'لوحة المالك':currentUser?'حسابي':'دخول';
+  const accountPath=isOwner?'/owner-login':currentUser?.role==='trader'?'/trader':currentUser?'/profile':'/login';
+  const accountLabel=isOwner?'لوحة المالك':currentUser?'حسابي':'تسجيل الدخول';
   useEscape(open?()=>setOpen(false):null);
-  const navItems=[['/','الرئيسية'],['/sell','بيع كراكيبك'],['/orders','طلباتي'],['/traders','التجار']];
+  const navItems=[[I.House,'/','الرئيسية'],[I.ClipboardList,'/orders','طلباتي'],[I.Store,'/traders','التجار']];
   return <header><div className="top">
     <button type="button" className="logoButton" onClick={()=>visit('/')} aria-label="العودة إلى الرئيسية"><Logo/></button>
-    <nav className="mainNav" aria-label="التنقل الرئيسي">{navItems.map(([to,label])=><button type="button" key={to} className={active(to)?'active':''} aria-current={active(to)?'page':undefined} onClick={()=>visit(to)}>{label}</button>)}</nav>
+    <nav className="mainNav" aria-label="التنقل الرئيسي">{navItems.map(([C,to,label])=><button type="button" key={to} className={active(to)?'active':''} aria-current={active(to)?'page':undefined} onClick={()=>visit(to)}><C/>{label}</button>)}</nav>
     <div className="headerActions">
-      <button type="button" className="headerSell" onClick={()=>visit('/sell')}><I.Camera/> <span>ابدأ البيع</span></button>
-      <button type="button" className={'icon notificationButton '+(unread?'hasUnread':'')} onClick={()=>visit('/notifications')} aria-label="الإشعارات"><I.Bell/>{unread>0&&<em>{unread>9?'٩+':number(unread)}</em>}</button>
-      <button type="button" className="headerAccount" onClick={()=>visit(accountPath)}>{isOwner?<I.LayoutDashboard/>:<I.UserRound/>}<span>{accountLabel}</span></button>
-      <button type="button" className="icon themeButton" onClick={()=>setDark(!dark)} aria-label={dark?'استخدام الوضع الفاتح':'استخدام الوضع الداكن'}>{dark?<I.Sun/>:<I.Moon/>}</button>
-      <div className="moreMenu"><button type="button" className="icon menuButton" aria-label={open?'إغلاق القائمة':'فتح القائمة'} aria-expanded={open} aria-controls="site-menu" onClick={()=>setOpen(!open)}>{open?<I.X/>:<I.Menu/>}</button>{open&&<div className="menuPanel" id="site-menu"><b>روابط سريعة</b><button onClick={()=>visit('/market')}><I.Search/> استكشف فرص البيع</button><button onClick={()=>visit('/chat')}><I.MessageCircle/> المحادثات</button>{!currentUser&&<><button onClick={()=>visit('/register')}><I.UserPlus/> إنشاء حساب</button><button onClick={()=>visit('/login')}><I.LogIn/> تسجيل الدخول</button></>}<button onClick={()=>visit('/trader-login')}><I.Store/> بوابة التاجر</button><button onClick={()=>act(onInstall)}><I.Download/> تثبيت التطبيق</button><button onClick={()=>visit('/about')}><I.Info/> عن المنصة</button>{isOwner?<button className="ownerMenu" onClick={()=>visit('/owner-login')}><I.LayoutDashboard/> لوحة المالك</button>:<button className="ownerMenu" onClick={()=>visit('/owner-login')}><I.LockKeyhole/> دخول المالك</button>}{currentUser&&<button onClick={()=>act(onLogout)}><I.LogOut/> خروج من الحساب</button>}{isOwner&&<button onClick={()=>act(onOwnerLogout)}><I.LogOut/> خروج المالك</button>}</div>}</div>
+      <a className="headerWhatsApp" href={OWNER_GENERAL_WHATSAPP} target="_blank" rel="noreferrer"><I.MessageCircle/> <span>مساعدة واتساب</span></a>
+      <button type="button" className="headerSell" onClick={()=>visit('/sell')}><I.Camera/> <span>بيع كراكيب</span></button>
+      <div className="moreMenu"><button type="button" className="icon menuButton" aria-label={open?'إغلاق القائمة':'فتح القائمة'} aria-expanded={open} aria-controls="site-menu" onClick={()=>setOpen(!open)}>{open?<I.X/>:<I.Menu/>}</button>{open&&<div className="menuPanel" id="site-menu"><b>كل الاختيارات</b><button onClick={()=>visit(accountPath)}>{isOwner?<I.LayoutDashboard/>:<I.UserRound/>} {accountLabel}</button><button onClick={()=>visit('/notifications')}><I.Bell/> الإشعارات {unread>0&&`(${number(unread)})`}</button><button onClick={()=>visit('/market')}><I.Search/> فرص البيع</button><button onClick={()=>visit('/register')}><I.UserPlus/> إنشاء حساب</button><button onClick={()=>visit('/trader-login')}><I.Store/> بوابة التاجر</button><button onClick={()=>act(onInstall)}><I.Download/> تثبيت التطبيق</button><button className="themeMenu" onClick={()=>act(()=>setDark(!dark))}>{dark?<I.Sun/>:<I.Moon/>} {dark?'الوضع الفاتح':'الوضع الداكن'}</button><button onClick={()=>visit('/about')}><I.Info/> عن الموقع</button>{!isOwner&&<button className="ownerMenu" onClick={()=>visit('/owner-login')}><I.LockKeyhole/> دخول المالك</button>}{currentUser&&<button onClick={()=>act(onLogout)}><I.LogOut/> خروج من الحساب</button>}{isOwner&&<button onClick={()=>act(onOwnerLogout)}><I.LogOut/> خروج المالك</button>}</div>}</div>
     </div>
   </div></header>;
 }
 function Footer({go}){return <footer className="siteFooter"><div className="wrap footerGrid"><div className="footerBrand"><button type="button" className="logoButton" onClick={()=>go('/')}><Logo/></button><p>نحوّل الكراكيب إلى قيمة بخطوات واضحة، وتحت إشراف موثوق من أول طلب حتى الاتفاق.</p><a href={`https://wa.me/${OWNER_WHATSAPP_NUMBER}`} target="_blank" rel="noreferrer"><I.MessageCircle/> تواصل عبر واتساب</a></div><div className="footerLinks"><b>ابدأ الآن</b><button onClick={()=>go('/sell')}>أرسل طلب بيع</button><button onClick={()=>go('/orders')}>تابع طلباتك</button><button onClick={()=>go('/traders')}>دليل التجار</button></div><div className="footerLinks"><b>كوكب كراكيب</b><button onClick={()=>go('/about')}>عن المنصة</button><button onClick={()=>go('/register')}>إنشاء حساب</button><button onClick={()=>go('/trader-login')}>بوابة التاجر</button></div></div><div className="wrap footerBottom"><span>© {new Date().getFullYear()} كوكب كراكيب</span><span><I.ShieldCheck/> خصوصيتك أولويتنا</span></div></footer>}
-function Bottom({go,path}){const links=[[I.House,'الرئيسية','/'],[I.Send,'بيع','/sell'],[I.ClipboardList,'طلباتي','/orders'],[I.Store,'التجار','/traders'],[I.UserRound,'حسابي','/profile']];const active=to=>path===to||to==='/orders'&&path==='/cart';return <nav className="bottom" aria-label="التنقل السفلي">{links.map(([C,label,to])=><button className={active(to)?'active':''} aria-current={active(to)?'page':undefined} onClick={()=>go(to)} key={to}><span><C/></span>{label}</button>)}</nav>}
+function Bottom({go,path}){const links=[[I.House,'الرئيسية','/'],[I.ClipboardList,'طلباتي','/orders'],[I.Store,'التجار','/traders']];const active=to=>path===to||to==='/orders'&&path==='/cart';return <nav className="bottom" aria-label="التنقل السفلي"><button className={active('/')?'active':''} aria-current={active('/')?'page':undefined} onClick={()=>go('/')}><span><I.House/></span>الرئيسية</button><button className={'bottomSell '+(active('/sell')?'active':'')} aria-current={active('/sell')?'page':undefined} onClick={()=>go('/sell')}><span><I.Camera/></span>بيع</button>{links.slice(1,2).map(([C,label,to])=><button className={active(to)?'active':''} aria-current={active(to)?'page':undefined} onClick={()=>go(to)} key={to}><span><C/></span>{label}</button>)}<a href={OWNER_GENERAL_WHATSAPP} target="_blank" rel="noreferrer"><span><I.MessageCircle/></span>مساعدة</a></nav>}
 function NotFound({go}){return <section className="wrap page"><div className="empty notFound"><I.SearchX/><h1>الصفحة غير موجودة</h1><p>ربما تغيّر الرابط أو حُذفت الصفحة. يمكنك العودة للرئيسية أو استكشاف بقية المنصة.</p><div className="authActions"><button className="primary" onClick={()=>go('/')}><I.House/> العودة للرئيسية</button><button className="secondary" onClick={()=>go('/sell')}><I.Send/> أرسل طلب بيع</button></div></div></section>}
 
-function Home({go,clientCount,traders}){const active=traders.filter(t=>t.status==='active');return <>
-  <section className="hero wrap sellHero">
-    <div className="heroText"><span className="eyebrow"><I.Sparkles/> أسهل طريقة تبيع بها كراكيبك</span><h1>كراكيبك لها قيمة.<br/><mark>نوصّلها للتاجر الصح.</mark></h1><p>صوّر ما تريد بيعه وأرسل بيانات بسيطة. يراجع المالك طلبك، يختار التاجر المناسب، وتتابع كل خطوة من مكان واحد.</p><div className="heroPromises"><span><I.Timer/> طلبك في دقيقتين</span><span><I.EyeOff/> بياناتك غير معلنة</span><span><I.BadgeCheck/> تجار تحت المراجعة</span></div><div className="actions"><button className="primary heroCta" onClick={()=>go('/sell')}><I.Camera/> صوّر وابدأ البيع <I.ArrowLeft/></button><button className="secondary" onClick={()=>go('/orders')}><I.ClipboardList/> تابع طلبك</button></div><div className="trust"><span><b>+{number(clientCount)}</b> عميل مسجّل بخصوصية</span><span><b>{number(active.length)}</b> تاجر موثوق ونشط</span><span><b>٤ خطوات</b> من الطلب إلى العرض</span></div></div>
-    <div className="heroVisual" aria-label="رحلة طلب البيع في كوكب كراكيب"><div className="heroBrandMark"><img src="/logo.svg" alt="شعار كوكب كراكيب"/><span>بيع منظم وآمن</span></div><div className="journeyCard"><div className="journeyHead"><span><I.Route/></span><div><small>رحلة طلبك</small><b>كل خطوة واضحة أمامك</b></div><em>٤ خطوات</em></div><ol><li className="done"><span><I.Check/></span><div><b>أرسل الصور والتفاصيل</b><small>لن تُنشر بياناتك للعامة</small></div></li><li className="current"><span>٢</span><div><b>مراجعة الطلب</b><small>يتأكد المالك من التفاصيل</small></div></li><li><span>٣</span><div><b>اختيار التاجر المناسب</b><small>حسب النوع والمنطقة والتقييم</small></div></li><li><span>٤</span><div><b>استلم عرض الشراء</b><small>وتواصل مع التاجر بأمان</small></div></li></ol></div><div className="heroSafe"><I.LockKeyhole/><span><b>خصوصية كاملة</b><small>بياناتك تظهر للمختص فقط</small></span></div></div>
-  </section>
-  <section className="wrap quickStart" aria-labelledby="quick-title"><div className="sectionTitle"><div><small>وصول سريع</small><h2 id="quick-title">اختر ما تريد إنجازه</h2></div><p>ثلاثة اختيارات واضحة توصّلك مباشرة إلى هدفك.</p></div><div className="quickGrid"><button className="quickPrimary" onClick={()=>go('/sell')}><span><I.Camera/></span><div><b>أبيع كراكيب الآن</b><small>أرسل الصور والتفاصيل للمالك</small></div><I.ArrowLeft/></button><button onClick={()=>go('/orders')}><span><I.ClipboardList/></span><div><b>أتابع طلبًا سابقًا</b><small>شاهد حالة المراجعة وعرض التاجر</small></div><I.ArrowLeft/></button><button onClick={()=>go('/traders')}><span><I.Store/></span><div><b>أتصفح التجار</b><small>قارن التخصصات والتقييمات</small></div><I.ArrowLeft/></button></div></section>
-  <section className="wrap workflowSection"><div className="sectionTitle"><div><small>من البداية إلى الاتفاق</small><h2>أربع خطوات بدون تعقيد</h2></div><span className="processNote"><I.LockKeyhole/> المالك يراجع قبل أي تواصل</span></div><div className="workflow">{[[I.Camera,'١. صوّر وأرسل','أضف صور الكراكيب والنوع والكمية والمنطقة في نموذج واحد.'],[I.ClipboardCheck,'٢. نراجع الطلب','يتأكد مالك الموقع من البيانات ويحافظ على خصوصيتها.'],[I.UserRoundCog,'٣. نختار التاجر','يُسند الطلب إلى تاجر موثوق ومناسب للتخصص والمنطقة.'],[I.MessagesSquare,'٤. استلم العرض','شاهد عرض الشراء ونسّق الاستلام مع التاجر المكلّف.']].map(([C,title,text])=><article key={title}><span><C/></span><h3>{title}</h3><p>{text}</p></article>)}</div></section>
-  <section className="wrap section traderPreview"><Title over="اختيارات موثقة" title="تجار بتقييمات حقيقية" action={()=>go('/traders')}/><div className="traderGrid">{active.slice(0,3).map(t=><TraderCard trader={t} key={t.id} go={go}/>)}</div></section>
-  <section className="rescue wrap"><div><span className="eyebrow light"><I.EyeOff/> خصوصية العميل أولًا</span><h2>بياناتك لا تظهر للعامة</h2><p>نعرض عدد العملاء فقط. أما اسمك وهاتفك وعنوانك فتظل خاصة، ولا يراها إلا المالك والتاجر الذي اختاره لمتابعة طلبك.</p><button onClick={()=>go('/register')}>أنشئ حسابك بسهولة <I.ArrowLeft/></button></div><div className="ecoStats"><span><I.UsersRound/><b>{number(clientCount)}</b><small>عميل مسجّل</small></span><span><I.BadgeCheck/><b>{number(active.length)}</b><small>تاجر موثوق</small></span><span><I.ShieldCheck/><b>١٠٠٪</b><small>مراجعة قبل التواصل</small></span></div></section>
-</>}
-function Title({over,title,action}){return <div className="sectionTitle"><div><small>{over}</small><h2>{title}</h2></div>{action&&<button onClick={action}>عرض الكل <I.ArrowLeft/></button>}</div>}
-
+function Home({go}){
+  const guide='بيع كراكيبك سهل. الخطوة الأولى صوّر الحاجة. الخطوة الثانية اختار نوعها ومكانك. الخطوة الثالثة اكتب رقم الموبايل واضغط إرسال على واتساب. لو محتاج مساعدة اضغط زر واتساب.';
+  return <>
+    <section className="wrap easyHero">
+      <div className="easyHeroCopy"><span className="eyebrow"><I.Sparkles/> بيع سهل من غير تعقيد</span><h1>صوّر.<br/>اختار.<br/><mark>وابعت واتساب.</mark></h1><p className="easyLead">مش لازم تكتب كتير. اختار بالصور، وسيب رقمك، والطلب هيتجه لواتساب المالك على طول.</p><div className="easyHeroActions"><button className="primary" onClick={()=>go('/sell')}><I.Camera/> ابدأ طلب البيع <I.ArrowLeft/></button><ReadButton text={guide} label="اسمع الطريقة"/></div><div className="ownerContactLine"><I.MessageCircle/> المساعدة مباشرة على <a href={OWNER_GENERAL_WHATSAPP} target="_blank" rel="noreferrer">{OWNER_PHONE}</a></div></div>
+      <div className="easyVisual" aria-label="ثلاث خطوات سهلة لإرسال طلب البيع"><div className="easyVisualTitle"><span><I.Hand/></span><div><small>كل اللي عليك</small><b>٣ خطوات واضحات</b></div></div><ol className="easyPictureSteps"><li><span><I.Camera/></span><div><b>صوّر الحاجة</b><small>صورة بالموبايل تكفي</small></div><em>١</em></li><li><span><I.LayoutGrid/></span><div><b>دوس على النوع</b><small>حديد، كرتون، أجهزة أو غيره</small></div><em>٢</em></li><li><span><I.MessageCircle/></span><div><b>ابعت على واتساب</b><small>الرسالة تروح للمالك مباشرة</small></div><em>٣</em></li></ol></div>
+    </section>
+    <section className="wrap easySection"><div className="easyHeading"><small>الطريقة</small><h2>ولا تسجيل ولا خطوات كتير</h2><p>كل خطوة فيها صورة وزر كبير. ولو مش عايز تكتب، استخدم زر الميكروفون.</p></div><div className="threeEasySteps"><article><em>١</em><span><I.Camera/></span><div><h3>صوّر</h3><p>خد صورة واضحة للحاجة اللي عايز تبيعها.</p></div></article><article><em>٢</em><span><I.MapPin/></span><div><h3>اختار</h3><p>اختار النوع والكمية والمحافظة بأزرار كبيرة.</p></div></article><article><em>٣</em><span><I.MessageCircle/></span><div><h3>ابعت</h3><p>واتساب يفتح برسالة جاهزة على رقم المالك.</p></div></article></div></section>
+    <section className="wrap easySection"><div className="easyHeading"><small>بتبيع إيه؟</small><h2>اختار بالصورة</h2><p>دوس على النوع وهنبدأ الطلب فورًا.</p></div><div className="easyCategoryGrid">{cats.slice(0,6).map(c=><button key={c[0]} onClick={()=>go('/sell?category='+encodeURIComponent(c[0]))}><span><CategoryIcon name={c[0]}/></span><b>{c[0]}</b></button>)}</div></section>
+    <section className="wrap easyHelp"><span><I.Headphones/></span><div><h2>مش عارف تعمل الطلب؟</h2><p>دوس واتساب وكلم المالك مباشرة. هنساعدك خطوة بخطوة.</p></div><a href={OWNER_GENERAL_WHATSAPP} target="_blank" rel="noreferrer"><I.MessageCircle/> كلّمنا على واتساب</a></section>
+  </>;
+}
 function TraderCard({trader,go,admin=false,onActivate,onSuspend}){return <article className={'traderCard '+(trader.status!=='active'?'pendingTrader':'')}><div className="traderTop"><span className="traderAvatar">{trader.initial}</span><div><h3>{trader.name}{trader.verified&&<I.BadgeCheck/>}</h3><p><I.MapPin/> {trader.city}</p></div><StatusTrader value={trader.status}/></div><div className="traderFacts"><span><I.BriefcaseBusiness/><small>التخصص</small><b>{trader.specialty}</b></span><span><I.Star/><small>التقييم</small><b>{trader.reviews?`${Number(trader.rating).toFixed(1)} / ٥`:'جديد'}</b></span><span><I.MessageCircle/><small>الاستجابة</small><b>{trader.reply}</b></span></div>{admin&&(trader.phone||trader.about)&&<div className="traderContactPrivate"><I.LockKeyhole/><span>{trader.phone&&<b>{trader.phone}</b>}{trader.about&&<em>{trader.about}</em>}</span></div>}{admin?<div className="traderAdminActions">{trader.status==='pending'&&<button className="primary" onClick={()=>onActivate(trader.id)}><I.Check/> اعتماد التاجر</button>}{trader.status==='active'&&<button className="secondary warning" onClick={()=>onSuspend(trader.id)}><I.PauseCircle/> إيقاف مؤقت</button>}{trader.status==='suspended'&&<button className="secondary" onClick={()=>onActivate(trader.id)}><I.RotateCcw/> إعادة التفعيل</button>}</div>:<div className="traderCardFoot"><Stars rating={trader.rating}/><span>{number(trader.reviews)} تقييم</span><button onClick={()=>go('/sell')} disabled={trader.status!=='active'}><I.Route/> اطلب إحالة</button></div>}</article>}
 function StatusTrader({value}){const labels={active:'موثّق',pending:'بانتظار الاعتماد',suspended:'موقوف مؤقتًا'};return <span className={'traderStatus '+value}>{labels[value]||value}</span>}
 
@@ -289,34 +341,69 @@ function RequestCard({request,trader,go}){return <article className="requestCard
 function Empty({go}){return <div className="empty"><I.SearchX/><h2>لا توجد فرص مطابقة الآن</h2><p>يمكنك إرسال طلب بيع جديد وسيراجعه مالك الموقع.</p><button className="primary" onClick={()=>go('/sell')}>أرسل طلب بيع</button></div>}
 function RequestDetail({go,requests,traders,priceOffers,currentUser,isOwner}){const{id}=useParams();const request=requests.find(r=>r.id===id);if(!request)return <Empty go={go}/>;const trader=traders.find(t=>t.id===request.traderId);const offer=priceOffers.find(o=>o.requestId===request.id&&o.traderId===request.traderId);const isAssignedTrader=currentUser?.role==='trader'&&currentUser.traderId===request.traderId;const canViewContact=isAssignedTrader||isOwner;return <section className="wrap page requestDetail"><button className="backLink" onClick={()=>go('/market')}><I.ArrowRight/> العودة لفرص البيع</button><div className="requestDetailGrid"><div className="detailImage"><img src={request.image||products[0].img} alt={request.title} loading="lazy" decoding="async"/></div><div className="requestDetailInfo"><Status value={request.status}/><small>{request.id} · {request.category}</small><h1>{request.title}</h1><p>هذا طلب بيع يمر عبر كوكب كراكيب. لا يبدأ أي اتفاق إلا بعد مراجعة المالك وتوجيه الطلب إلى تاجر مناسب.</p><div className="detailFacts"><span><I.Scale/><small>الكمية</small><b>{request.quantity}</b></span><span><I.MapPin/><small>المنطقة</small><b>{request.location}</b></span><span><I.CalendarClock/><small>أُرسل</small><b>{request.createdAt}</b></span></div>{trader?<><div className="assignedDetail"><div><span className="traderAvatar">{trader.initial}</span><div><small>التاجر المكلّف من المالك</small><b>{trader.name} <I.BadgeCheck/></b><p>{trader.specialty} · <Stars rating={trader.rating}/> · {number(trader.reviews)} تقييم</p></div></div><button className="primary" onClick={()=>go('/chat?trader='+trader.id)}><I.MessageCircle/> ابدأ المحادثة</button></div>{offer?<div className="priceOfferBox"><span><I.Banknote/></span><div><small>عرض شراء التاجر</small><b>{number(offer.amount)} ج.م <em>/ {offer.unit}</em></b><p>{offer.note||'لا توجد ملاحظات إضافية.'}</p></div><time>{offer.updatedAt}</time></div>:<div className="awaitingOffer"><I.BadgeDollarSign/><span>التاجر لم يضف سعر الشراء بعد</span></div>}{canViewContact&&<div className="contactAccess"><div className="contactAccessHead"><I.ContactRound/><div><b>بيانات الاستلام الخاصة</b><small>مرئية للتاجر المُسند ومالك الموقع فقط</small></div></div><p><I.UserRound/> <b>اسم العميل:</b> {request.customerName||'غير مذكور'}</p><p><I.Phone/> <b>الهاتف:</b> {request.phone||'غير متاح'}</p><p><I.MapPinned/> <b>العنوان:</b> {request.address||request.location}</p><p><I.Clock3/> <b>وقت مناسب للتواصل:</b> {request.pickupTime||'يُنسّق عبر المحادثة'}</p></div>}</>:<div className="reviewNotice"><I.ClipboardClock/><div><b>طلبك ما زال لدى المالك</b><p>سيظهر التاجر ويفتح التواصل فور اعتماد الطلب وإسناده.</p></div></div>}</div></div></section>}
 
-function Sell({go,createRequest}){const[files,setFiles]=useState([]);const[error,setError]=useState('');const[done,setDone]=useState('');const[whatsappUrl,setWhatsappUrl]=useState('');
+function Sell({go,createRequest}){
+  const{search}=useLocation();
+  const queryCategory=new URLSearchParams(search).get('category')||'';
+  const initialCategory=cats.some(c=>c[0]===queryCategory)?queryCategory:'';
+  const[step,setStep]=useState(1);
+  const[files,setFiles]=useState([]);
+  const[previews,setPreviews]=useState([]);
+  const[error,setError]=useState('');
+  const[done,setDone]=useState(null);
+  const[locating,setLocating]=useState(false);
+  const[form,setForm]=useState({category:initialCategory,quantity:'',condition:'مش عارف',region:'',area:'',customerName:'',phone:'',address:'',pickupTime:'أي وقت مناسب',notes:''});
+  const update=(key,value)=>{setForm(current=>({...current,[key]:value}));setError('')};
+  const useMyLocation=()=>{
+    if(!navigator.geolocation){setError('تحديد المكان مش متاح هنا. اختار المحافظة من الأزرار.');return}
+    setLocating(true);setError('');
+    navigator.geolocation.getCurrentPosition(position=>{
+      const{latitude,longitude}=position.coords;
+      setForm(current=>({...current,region:'موقعي من الموبايل',area:`https://maps.google.com/?q=${latitude.toFixed(6)},${longitude.toFixed(6)}`}));
+      setLocating(false);
+    },()=>{setLocating(false);setError('مقدرناش نحدد المكان. اسمح للموقع بالوصول للمكان أو اختار المحافظة.')},{enableHighAccuracy:true,timeout:10000,maximumAge:60000});
+  };
   const pickFiles=e=>{
     setError('');
-    const chosen=[...e.target.files];
-    if(chosen.length>8){setError('يمكنك إرفاق ٨ صور كحد أقصى.');return}
-    for(const file of chosen){
-      if(!['image/jpeg','image/png'].includes(file.type)){setError('الصور يجب أن تكون بصيغة JPG أو PNG فقط.');return}
-      if(file.size>5*1024*1024){setError('حجم كل صورة يجب ألا يزيد عن ٥ ميجابايت.');return}
-    }
-    setFiles(chosen);
+    const chosen=[...e.target.files].slice(0,8);
+    if([...e.target.files].length>8){setError('اختار ٨ صور أو أقل.');return}
+    for(const file of chosen){if(!['image/jpeg','image/png','image/webp'].includes(file.type)){setError('اختار صور JPG أو PNG أو WEBP فقط.');return}if(file.size>5*1024*1024){setError('في صورة حجمها كبير. اختار صورة أقل من ٥ ميجا.');return}}
+    previews.forEach(item=>URL.revokeObjectURL(item.url));
+    setFiles(chosen);setPreviews(chosen.map(file=>({name:file.name,url:URL.createObjectURL(file)})));
   };
+  const validate=current=>{
+    if(current===1&&!form.category)return 'دوس على صورة نوع الحاجة الأول.';
+    if(current===2&&!form.quantity)return 'اختار الكمية: قطعة، شوية حاجات، أو كمية كبيرة.';
+    if(current===2&&!form.region)return 'اختار المحافظة اللي الحاجة موجودة فيها.';
+    return '';
+  };
+  const next=()=>{const message=validate(step);if(message){setError(message);return}setError('');setStep(value=>Math.min(3,value+1));window.scrollTo({top:0,behavior:'smooth'})};
+  const back=()=>{setError('');setStep(value=>Math.max(1,value-1));window.scrollTo({top:0,behavior:'smooth'})};
   const submit=e=>{
-    e.preventDefault();
-    setError('');
-    const form=new FormData(e.currentTarget);
-    const quantity=Number(form.get('quantity'));
-    if(!Number.isFinite(quantity)||quantity<1||quantity>1000000){setError('أدخل كمية صحيحة (من ١ إلى مليون).');return}
-    const category=form.get('category');
-    const image=cats.find(c=>c[0]===category)?.[3]||products[0].img;
-    const result=createRequest({customerName:form.get('customerName'),title:form.get('title'),category,quantity:`${quantity} ${form.get('unit')}`,location:form.get('location'),description:form.get('description'),phone:form.get('phone'),address:form.get('address'),pickupTime:form.get('pickupTime'),image});
-    if(!result||!result.ok){setError((result&&result.error)||'تعذر إرسال الطلب، راجع البيانات وحاول مرة أخرى.');return}
-    setFiles([]);
-    setWhatsappUrl(result.whatsappUrl||'');
+    e.preventDefault();setError('');
+    const location=form.region==='موقعي من الموبايل'?`الموقع على الخريطة: ${form.area}`:[form.area,form.region].filter(Boolean).join('، ');
+    const result=createRequest({customerName:form.customerName,title:`${form.category} للبيع`,category:form.category,quantity:form.quantity,location,description:[form.condition,form.notes].filter(Boolean).join(' — '),phone:form.phone,address:form.address||location,pickupTime:form.pickupTime,image:cats.find(c=>c[0]===form.category)?.[3]||products[0].img,photoCount:files.length});
+    if(!result?.ok){setError(result?.error||'راجع رقم الموبايل وحاول تاني.');return}
+    setDone({id:result.id,url:result.whatsappUrl});
     if(result.whatsappUrl)window.open(result.whatsappUrl,'_blank','noopener,noreferrer');
-    setDone(result.id);
   };
-if(done)return <section className="success saleSuccess"><span><I.Send/></span><h1>وصل طلب البيع إلى المالك</h1><p>رقم طلبك <b>#{done}</b>. تم تجهيز كل بياناتك وفتح واتساب لإرسالها إلى المالك على الرقم <b dir="ltr">{OWNER_PHONE}</b>.</p>{whatsappUrl&&<a className="primary whatsappAction" href={whatsappUrl} target="_blank" rel="noreferrer"><I.MessageCircle/> إعادة إرسال الطلب للمالك على واتساب</a>}<div className="successPath"><span><I.ClipboardCheck/> مراجعة المالك</span><I.ArrowLeft/><span><I.UserRoundCog/> إسناد لتاجر</span><I.ArrowLeft/><span><I.MessageCircle/> محادثة آمنة</span></div><button className="primary" onClick={()=>go('/orders')}>متابعة طلبات البيع</button></section>;return <section className="wrap page narrow sellPage"><div className="pageHead"><div><small>خطوتك الأولى للبيع</small><h1>أرسل طلب بيع</h1><p>لن يُنشر الطلب ولن يصل إلى أي تاجر قبل موافقة مالك الموقع.</p></div><span className="secureBadge"><I.ShieldCheck/> مراجعة قبل الإسناد</span></div><div className="ownerGate"><span><I.Crown/></span><div><b>إرسال مباشر وسهل للمالك</b><p>بعد الضغط على زر الإرسال، تُفتح رسالة واتساب جاهزة بكل بياناتك للمالك على الرقم <a href={`tel:${OWNER_PHONE}`} dir="ltr">{OWNER_PHONE}</a>، ثم يراجع الطلب ويختار التاجر المناسب.</p></div></div><form className="formCard sellform" onSubmit={submit}><label className="upload"><I.ImagePlus/><b>أضف صور الكراكيب</b><span>حتى ٨ صور بصيغة JPG أو PNG وبحد ٥ ميجابايت للصورة</span><input type="file" accept="image/png,image/jpeg" multiple onChange={pickFiles}/></label>{files.length>0&&<div className="previews">{files.map((file,i)=><span key={file.name+i}><I.Image/>{file.name}<small>{i===0?'صورة رئيسية':''}</small></span>)}</div>}{error&&<div className="loginError" role="alert"><I.CircleAlert/>{error}</div>}<div className="formgrid"><label className="wide">اسم العميل <i>مطلوب</i><input name="customerName" required minLength="2" maxLength="80" autoComplete="name" placeholder="اكتب اسمك بالكامل"/></label><label>ماذا تريد أن تبيع؟ <i>مطلوب</i><input name="title" required maxLength="80" placeholder="مثال: خردة نحاس نظيف"/></label><label>التصنيف <i>مطلوب</i><select name="category" required>{cats.map(c=><option key={c[0]}>{c[0]}</option>)}</select></label><label>الكمية <i>مطلوب</i><input name="quantity" required type="number" min="1" max="1000000" placeholder="0" inputMode="numeric"/></label><label>الوحدة <i>مطلوب</i><select name="unit">{UNITS.map(u=><option key={u}>{u}</option>)}</select></label><label className="wide">وصف الحالة <i>مطلوب</i><textarea name="description" required maxLength="600" placeholder="اكتب الحالة وأي تفاصيل تساعد المالك على اختيار التاجر المناسب"/></label><label>رقم الهاتف للتواصل <i>مطلوب</i><input name="phone" required type="tel" inputMode="tel" autoComplete="tel" placeholder="01xxxxxxxxx"/></label><label>المنطقة والمحافظة <i>مطلوب</i><input name="location" required maxLength="80" placeholder="مثال: مدينة نصر، القاهرة"/></label><label className="wide">العنوان التفصيلي للاستلام <i>مطلوب</i><textarea name="address" required maxLength="300" placeholder="اسم الشارع، رقم المبنى، الدور، وأقرب علامة مميزة"/></label><label className="wide">الوقت الأنسب للتواصل أو الاستلام <i>مطلوب</i><input name="pickupTime" required maxLength="100" placeholder="مثال: يوميًا من ٤ م إلى ٨ م"/></label></div><div className="privateContactNote"><I.LockKeyhole/><span><b>بيانات التواصل والعنوان خاصة.</b> لا تظهر للعامة أو للتجار غير المكلّفين؛ يراها مالك الموقع والتاجر الذي يسند إليه الطلب فقط.</span></div><label className="privacyCheck"><input required type="checkbox"/> أؤكد أن البيانات صحيحة، وأوافق على مراجعة مالك الموقع للطلب قبل إحالته إلى أي تاجر.</label><button className="primary submit whatsappSubmit">إرسال الطلب عبر واتساب <I.MessageCircle/></button></form></section>}
-
+  if(done)return <section className="simpleSuccess"><span><I.MessageCircle/></span><h1>الطلب جاهز على واتساب</h1><p>رقم الطلب <b>#{done.id}</b>. اضغط الزر الأخضر، وبعد ما واتساب يفتح اضغط سهم الإرسال. كده الطلب يوصل للمالك على <b dir="ltr">{OWNER_PHONE}</b>.</p><div className="finalInstruction"><span><i>١</i> افتح واتساب</span><span><i>٢</i> اضغط إرسال</span><span><i>٣</i> أرفق الصور</span></div><a className="primary whatsappAction" href={done.url} target="_blank" rel="noreferrer"><I.MessageCircle/> فتح واتساب وإرسال الطلب</a><button className="secondary" onClick={()=>go('/orders')}><I.ClipboardList/> متابعة الطلب</button></section>;
+  const guide=step===1?'الخطوة الأولى. دوس على صورة نوع الحاجة اللي عايز تبيعها. تقدر كمان تضيف صور من الموبايل.':step===2?'الخطوة الثانية. اختار الكمية وحالة الحاجة والمحافظة. لو محتاج تكتب المنطقة اضغط الميكروفون واتكلم.':'الخطوة الأخيرة. اكتب رقم الموبايل. الاسم والعنوان اختياريين. بعد كده اضغط الزر الأخضر لإرسال الطلب على واتساب.';
+  const quantities=[['قطعة واحدة','مثال: غسالة أو كرسي',I.Package],['شوية حاجات','أكتر من قطعة',I.Boxes],['كمية كبيرة','شوال أو حمولة',I.Scale]];
+  const conditions=[['سليم','شغال كويس',I.CircleCheck],['مستعمل','فيه استعمال',I.History],['تالف / خردة','مش شغال',I.Wrench],['مش عارف','المالك يحدد',I.HelpCircle]];
+  const regions=['القاهرة','الجيزة','القليوبية','الإسكندرية','الشرقية','محافظة أخرى'];
+  const pickupTimes=['الصبح','بعد الظهر','بالليل','أي وقت مناسب'];
+  return <section className="wrap page easySellPage">
+    <div className="easySellHead"><span className="eyebrow"><I.MessageCircle/> الطلب يروح للمالك على واتساب</span><h1>بيع كراكيبك بسهولة</h1><p>اختار بالأزرار. الكتابة قليلة وممكن تتكلم بالميكروفون.</p><ReadButton text={guide} label="اسمع الخطوة"/></div>
+    <div className="stepProgress" aria-label={`الخطوة ${step} من ٣`}><span className={step===1?'active':step>1?'done':''}><i>{step>1?<I.Check/>:'١'}</i> صوّر واختار</span><span className={step===2?'active':step>2?'done':''}><i>{step>2?<I.Check/>:'٢'}</i> الكمية والمكان</span><span className={step===3?'active':''}><i>٣</i> رقمك وواتساب</span></div>
+    <form className="easyOrderCard" onSubmit={submit}>
+      {error&&<div className="stepError" role="alert"><I.CircleAlert/>{error}</div>}
+      {step===1&&<div className="easyStep"><div className="easyStepTitle"><span><I.Camera/></span><div><h2>بتبيع إيه؟</h2><p>دوس على النوع المناسب</p></div></div><div className="pictureCategoryGrid">{cats.map(c=><button type="button" key={c[0]} className={form.category===c[0]?'selected':''} aria-pressed={form.category===c[0]} onClick={()=>update('category',c[0])}><span><CategoryIcon name={c[0]}/></span><b>{c[0]}</b></button>)}</div><div className="optionTitle"><I.ImagePlus/> عندك صور؟ <small>اختياري</small></div><label className="simpleUpload"><I.Camera/><b>{files.length?`تم اختيار ${number(files.length)} صور`:'اضغط هنا وصوّر الحاجة'}</b><small>الصور تساعد في معرفة السعر</small><input type="file" accept="image/png,image/jpeg,image/webp" capture="environment" multiple onChange={pickFiles}/></label>{previews.length>0&&<div className="photoPreviewRow">{previews.map((item,i)=><span key={item.url}><img src={item.url} alt={`صورة الكراكيب ${i+1}`}/><small>{item.name}</small></span>)}</div>}</div>}
+      {step===2&&<div className="easyStep"><div className="easyStepTitle"><span><I.MapPin/></span><div><h2>الكمية والمكان</h2><p>اختيارات سريعة من غير كتابة</p></div></div><div className="optionTitle"><I.Boxes/> الكمية <span>مطلوب</span></div><div className="choiceGrid three">{quantities.map(([value,hint,C])=><button type="button" key={value} className={form.quantity===value?'selected':''} onClick={()=>update('quantity',value)}><C/><b>{value}</b><small>{hint}</small></button>)}</div><div className="optionTitle"><I.Sparkles/> حالة الحاجة <small>اختياري</small></div><div className="choiceGrid">{conditions.map(([value,hint,C])=><button type="button" key={value} className={form.condition===value?'selected':''} onClick={()=>update('condition',value)}><C/><b>{value}</b><small>{hint}</small></button>)}</div><div className="optionTitle"><I.MapPinned/> المكان <span>مطلوب</span></div><button type="button" className={'geoLocate '+(form.region==='موقعي من الموبايل'?'selected':'')} onClick={useMyLocation} disabled={locating}>{locating?<span className="spinner"/>:<I.LocateFixed/>}<span><b>{locating?'بنحدد مكانك...':'حدد مكاني بالموبايل'}</b><small>دوس مرة واحدة واسمح بتحديد المكان</small></span>{form.region==='موقعي من الموبايل'&&<I.CircleCheck/>}</button><div className="orDivider"><span>أو اختار المحافظة</span></div><div className="choiceGrid locationGrid">{regions.map(region=><button type="button" key={region} className={form.region===region?'selected':''} onClick={()=>update('region',region)}><I.MapPin/><b>{region}</b></button>)}</div><div className="easyFields"><label className="easyField wide"><span>المنطقة أو أقرب علامة <small>اختياري</small></span><input value={form.area} onChange={e=>update('area',e.target.value)} maxLength="80" placeholder="مثال: شبرا، جنب المترو"/><VoiceButton onResult={value=>update('area',value)}/></label><label className="easyField wide"><span>معلومة عن الحاجة <small>اختياري</small></span><textarea value={form.notes} onChange={e=>update('notes',e.target.value)} maxLength="300" placeholder="سيبها فاضية لو مش عايز تكتب"/><VoiceButton onResult={value=>update('notes',value)}/></label></div></div>}
+      {step===3&&<div className="easyStep"><div className="easyStepTitle"><span><I.Phone/></span><div><h2>هنكلمك إزاي؟</h2><p>رقم الموبايل هو المطلوب بس</p></div></div><div className="selectedSummary"><span><CategoryIcon name={form.category}/><div><small>النوع</small><b>{form.category}</b></div></span><span><I.Boxes/><div><small>الكمية</small><b>{form.quantity}</b></div></span><span><I.MapPin/><div><small>المكان</small><b>{form.region==='موقعي من الموبايل'?'تم تحديده على الخريطة':[form.area,form.region].filter(Boolean).join('، ')}</b></div></span></div><div className="easyFields"><label className="easyField"><span>رقم الموبايل <small>مطلوب</small></span><div className="fieldWithIcon"><I.Phone/><input value={form.phone} onChange={e=>update('phone',e.target.value)} type="tel" inputMode="tel" autoComplete="tel" placeholder="01xxxxxxxxx" required/></div></label><label className="easyField"><span>الاسم <small>اختياري</small></span><input value={form.customerName} onChange={e=>update('customerName',e.target.value)} autoComplete="name" maxLength="80" placeholder="ممكن تسيبه فاضي"/><VoiceButton onResult={value=>update('customerName',value)} label="قول اسمك"/></label><label className="easyField wide"><span>العنوان بالتفصيل <small>اختياري</small></span><textarea value={form.address} onChange={e=>update('address',e.target.value)} maxLength="300" placeholder="ممكن تقوله بالميكروفون أو تبعته بعدين على واتساب"/><VoiceButton onResult={value=>update('address',value)}/></label></div><div className="optionTitle"><I.Clock3/> وقت مناسب للمكالمة</div><div className="choiceGrid">{pickupTimes.map(time=><button type="button" key={time} className={form.pickupTime===time?'selected':''} onClick={()=>update('pickupTime',time)}><I.Clock3/><b>{time}</b></button>)}</div><label className="easyConsent"><input required type="checkbox"/> <span>بياناتي صحيحة وموافق إن المالك يتواصل معايا بخصوص الطلب.</span></label><div className="whatsappPromise"><I.ShieldCheck/> بياناتك تروح للمالك فقط على رقم {OWNER_PHONE}</div></div>}
+      <div className="stepActions">{step>1&&<button type="button" className="secondary" onClick={back}><I.ArrowRight/> رجوع</button>}{step<3?<button type="button" className={'primary '+(step===1?'only':'')} onClick={next}>الخطوة اللي بعدها <I.ArrowLeft/></button>:<button className="primary whatsappFinish"><I.MessageCircle/> فتح واتساب وإرسال الطلب</button>}</div>
+    </form>
+  </section>;
+}
 function SaleRequests({go,requests,traders,priceOffers}){return <section className="wrap page narrow"><div className="pageHead"><div><small>بيعك تحت المتابعة</small><h1>طلبات البيع</h1><p>تتابع حالة الموافقة والإسناد وعرض شراء التاجر هنا.</p></div><button className="primary" onClick={()=>go('/sell')}><I.Plus/> طلب بيع جديد</button></div><div className="privacyStrip"><I.EyeOff/><span>خصوصيتك محفوظة: لا تظهر بيانات التواصل والعنوان إلا للمالك والتاجر الذي يُسند إليه الطلب.</span></div><div className="saleRequestList">{requests.map(r=>{const trader=traders.find(t=>t.id===r.traderId);const offer=priceOffers.find(o=>o.requestId===r.id&&o.traderId===r.traderId);return <article key={r.id}><img src={r.image||products[0].img} alt={r.title} loading="lazy" decoding="async"/><div className="saleReqMain"><small>{r.id} · {r.createdAt}</small><h3>{r.title}</h3><p><I.Scale/> {r.quantity} · <I.MapPin/> {r.location}</p>{offer&&<span className="inlineOffer"><I.Banknote/> عرض التاجر: {number(offer.amount)} ج.م / {offer.unit}</span>}</div><Status value={r.status}/><div className="saleReqTrader">{trader?<><span className="mini">{trader.initial}</span><span><small>التاجر المُسند</small><b>{trader.name}</b></span></>:<span className="unassigned"><I.ClipboardClock/> ينتظر قرار المالك</span>}</div><button onClick={()=>go('/request/'+r.id)}>التفاصيل <I.ChevronLeft/></button></article>})}</div></section>}
 
 function Traders({go,traders,rateTrader,ratedTraders}){const[query,setQuery]=useState('');const[target,setTarget]=useState(null);const list=traders.filter(t=>t.status==='active').filter(t=>!query||t.name.includes(query)||t.specialty.includes(query)||t.city.includes(query));return <section className="wrap page"><div className="pageHead"><div><small>مراجَعون من مالك المنصة</small><h1>دليل التجار الموثوقين</h1><p>اطّلع على تخصص كل تاجر وتقييم عملائه. التواصل يُفعّل بعد أن يسند المالك الطلب.</p></div><button className="secondary" onClick={()=>go('/register')}><I.UserPlus/> سجّل كتاجر</button></div><div className="traderSearch"><I.Search/><input value={query} onChange={e=>setQuery(e.target.value)} placeholder="ابحث باسم التاجر أو تخصصه أو منطقته" aria-label="البحث في دليل التجار"/></div><div className="traderGrid directory">{list.map(t=><article className="traderCard" key={t.id}><div className="traderTop"><span className="traderAvatar">{t.initial}</span><div><h3>{t.name}{t.verified&&<I.BadgeCheck/>}</h3><p><I.MapPin/> {t.city}</p></div><StatusTrader value={t.status}/></div><div className="traderFacts"><span><I.BriefcaseBusiness/><small>التخصص</small><b>{t.specialty}</b></span><span><I.Star/><small>التقييم</small><b>{t.reviews?`${Number(t.rating).toFixed(1)} / ٥`:'جديد'}</b></span><span><I.MessageCircle/><small>الاستجابة</small><b>{t.reply}</b></span></div><div className="traderCardFoot"><span className="ratingCount"><Stars rating={t.rating}/>{number(t.reviews)} تقييم</span><div>{ratedTraders?.includes(t.id)?<span className="ratedDone"><I.CircleCheck/> تم تقييمك</span>:<button className="rateBtn" onClick={()=>setTarget(t)}><I.Star/> قيّم</button>}<button onClick={()=>go('/sell')}><I.Route/> اطلب إحالة</button></div></div></article>)}</div>{!list.length&&<Empty go={go}/>} {target&&<RatingDialog trader={target} close={()=>setTarget(null)} submit={rating=>{rateTrader(target.id,rating);setTarget(null)}}/>}</section>}
